@@ -11,7 +11,7 @@ type ToolLink = {
   label: string;
   href: string;
   description?: string;
-  icon: "globe" | "code" | "pen" | "photo" | "music" | "mail" | "bolt";
+  icon: "globe" | "code" | "pen" | "photo" | "music" | "mail" | "bolt" | "swap";
 };
 
 function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
@@ -135,6 +135,36 @@ function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
           />
         </svg>
       );
+    case "swap":
+      return (
+        <svg
+          className={common}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M7 16 3 12l4-4"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M17 8l4 4-4 4"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M3 12h18"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
     case "mail":
       return (
         <svg
@@ -206,6 +236,17 @@ export default function Home() {
             href: "/text/references",
             description: "引用",
             icon: "pen",
+          },
+        ] satisfies ToolLink[],
+      },
+      {
+        title: "files",
+        items: [
+          {
+            label: "converter",
+            href: "/files/converter",
+            description: "ファイル変換",
+            icon: "swap",
           },
         ] satisfies ToolLink[],
       },
