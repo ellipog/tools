@@ -248,6 +248,30 @@ export default function Home() {
             description: "ファイル変換",
             icon: "swap",
           },
+          {
+            label: "compressor",
+            href: "/files/compressor",
+            description: "ファイル圧縮",
+            icon: "bolt",
+          },
+          {
+            label: "hash",
+            href: "/files/hash",
+            description: "ハッシュ生成",
+            icon: "code",
+          },
+          {
+            label: "metadata",
+            href: "/files/metadata",
+            description: "ファイル情報",
+            icon: "pen",
+          },
+          {
+            label: "hex-viewer",
+            href: "/files/hex-viewer",
+            description: "16進表示",
+            icon: "code",
+          },
         ] satisfies ToolLink[],
       },
     ] as const;
