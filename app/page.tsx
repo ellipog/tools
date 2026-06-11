@@ -643,7 +643,7 @@ export default function Home() {
             icon: "shuffle",
             tags: ["random", "picker", "choose", "decision", "lottery", "raffle", "draw", "select", "giveaway", "randomizer"],
           },
-          ] satisfies ToolLink[],
+        ] satisfies ToolLink[],
       },
       {
         title: "files",
@@ -727,8 +727,8 @@ export default function Home() {
             </label>
           </div>
 
-          <div className="mt-6 pl-5 h-[calc(100vh-250px)] overflow-y-auto overflow-x-hidden custom-scrollbar">
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-x-10 [column-fill:auto]">
+          <div className="mt-6 pl-5 h-[calc(100vh-250px)] overflow-y-hidden overflow-x-auto custom-scrollbar">
+            <div className="columns-1 sm:columns-2 lg:columns-3 gap-x-10 h-full [column-fill:auto]">
               {filteredGroups.map((group) => (
                 <section
                   key={group.title}
