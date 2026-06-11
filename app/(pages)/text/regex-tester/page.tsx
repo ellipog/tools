@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
+import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
 import {
   testRegex,
@@ -318,6 +319,11 @@ export default function RegexTesterPage() {
             <div className="bg-[#050505] border border-white/5 min-h-[30vh] flex flex-col relative">
               <div className="absolute top-3 left-4 text-[10px] text-white/20 uppercase tracking-[0.4em] z-10">
                 <ScrambleText text="test_string" />
+              </div>
+              <div className="absolute top-3 right-4 z-10">
+                {result.isValid && pattern && testStr && (
+                  <ShareButton data={testStr} filename="regex-test-string.txt" />
+                )}
               </div>
 
               {testStr ? (

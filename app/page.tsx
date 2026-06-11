@@ -1,11 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import { jpcharlist } from "@/public/data/charlists";
 import FeatureModal from "@/components/RequestFeature";
+import CommandPalette from "@/components/CommandPalette";
+
+const PINS_KEY = "aaenz:pins";
 
 type ToolLink = {
   label: string;
@@ -364,11 +367,93 @@ function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
   }
 }
 
+function StarIcon({ filled, className = "" }: { filled: boolean; className?: string }) {
+  return (
+    <svg
+      className={`h-3 w-3 ${filled ? "text-yellow-400" : "text-white/40"} ${className}`}
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      aria-hidden="true"
+    >
+      <path
+        d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+        stroke={filled ? "currentColor" : "currentColor"}
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [query, setQuery] = useState("");
   const [showFeatureRequest, setShowFeatureRequest] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [pins, setPins] = useState<string[]>([]);
+  const [platformHint, setPlatformHint] = useState("ctrl+k");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const jpchars = useMemo(() => jpcharlist, []);
+
+  useEffect(() => {
+    try {
+      const rawPins = localStorage.getItem(PINS_KEY);
+      if (rawPins) setPins(JSON.parse(rawPins));
+    } catch {
+      // ignore corrupt data
+    }
+    try {
+      setPlatformHint(
+        navigator.platform?.includes("Mac") ? "cmd+k" : "ctrl+k",
+      );
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+      if (
+        e.key === " " &&
+        document.activeElement !== inputRef.current &&
+        !paletteOpen
+      ) {
+        e.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+      if (
+        e.key === "/" &&
+        document.activeElement !== inputRef.current &&
+        !paletteOpen
+      ) {
+        e.preventDefault();
+        inputRef.current?.focus();
+        return;
+      }
+      if (e.key === "Escape" && document.activeElement === inputRef.current) {
+        inputRef.current?.blur();
+        setQuery("");
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [paletteOpen]);
+
+  const togglePin = useCallback((href: string) => {
+    setPins((prev) => {
+      const next = prev.includes(href)
+        ? prev.filter((p) => p !== href)
+        : [...prev, href];
+      localStorage.setItem(PINS_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const groups = useMemo(() => {
     return [
@@ -462,6 +547,12 @@ export default function Home() {
     ] as const;
   }, []);
 
+  const allTools = useMemo(() => {
+    return groups.flatMap((g) =>
+      g.items.map((item) => ({ ...item, category: g.title })),
+    );
+  }, [groups]);
+
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return groups;
@@ -482,15 +573,19 @@ export default function Home() {
       <Navbar title="home" jp="ホーム" category="" />
       <div className="h-screen bg-black text-white flex flex-col">
         <div className="w-full px-6 py-12">
-          <div className="flex w-full justify-end gap-6  pb-4">
+          <div className="flex w-full justify-end gap-6 pb-4">
             <label className="flex items-center gap-2 text-md text-white/70 pr-8">
               <input
+                ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 inputMode="search"
                 placeholder="search…"
                 className="border-b border-white/10 w-44 sm:w-56 bg-transparent text-white/80 placeholder:text-white/50 outline-none text-right"
               />
+              <span className="text-[8px] tracking-[0.3em] text-white/20 uppercase shrink-0">
+                {platformHint}
+              </span>
             </label>
           </div>
 
@@ -527,6 +622,21 @@ export default function Home() {
                               className="text-sm text-white/35 group-hover:text-white/45 transition-colors"
                             />
                           ) : null}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              togglePin(item.href);
+                            }}
+                            className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer"
+                            aria-label={
+                              pins.includes(item.href)
+                                ? `Unpin ${item.label}`
+                                : `Pin ${item.label}`
+                            }
+                          >
+                            <StarIcon filled={pins.includes(item.href)} className="-mt-0.5" />
+                          </button>
                         </Link>
                       </li>
                     ))}
@@ -534,13 +644,13 @@ export default function Home() {
                 </section>
               ))}
             </div>
-          </div>
 
-          {filteredGroups.length === 0 && (
-            <div className="mt-10 text-sm text-white/45 text-center">
-              no matches found
-            </div>
-          )}
+            {filteredGroups.length === 0 && (
+              <div className="mt-10 text-sm text-white/45 text-center">
+                no matches found
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <div
@@ -561,6 +671,12 @@ export default function Home() {
       <FeatureModal
         isOpen={showFeatureRequest}
         onClose={() => setShowFeatureRequest(false)}
+      />
+      <CommandPalette
+        isOpen={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        tools={allTools}
+        pins={pins}
       />
     </div>
   );

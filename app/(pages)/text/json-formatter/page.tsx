@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
+import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
 import {
   formatJSON,
@@ -293,6 +294,14 @@ export default function JsonFormatterPage() {
             <div className="bg-[#050505] border border-white/5 min-h-[30vh] flex flex-col relative">
               <div className="absolute top-3 left-4 text-[10px] text-white/20 uppercase tracking-[0.4em] z-10">
                 <ScrambleText text={`output :: ${mode}`} />
+              </div>
+              <div className="absolute top-3 right-4 z-10">
+                {result.success && input && (
+                  <ShareButton
+                    data={result.output}
+                    filename={`formatted.${mode === "yaml" ? "yaml" : "json"}`}
+                  />
+                )}
               </div>
 
               {result.success && input ? (
