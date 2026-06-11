@@ -615,6 +615,13 @@ export default function Home() {
             icon: "search",
             tags: ["qr", "qrcode", "qr code", "barcode", "scan", "generate", "code", "url", "link", "encode"],
           },
+          {
+            label: "unit-converter",
+            href: "/utils/unit-converter",
+            description: "単位変換",
+            icon: "shuffle",
+            tags: ["unit", "convert", "converter", "length", "weight", "temperature", "volume", "speed", "data", "time", "area", "pressure", "energy", "conversion", "metric", "imperial"],
+          },
         ] satisfies ToolLink[],
       },
       {
