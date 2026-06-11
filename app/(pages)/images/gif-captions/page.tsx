@@ -12,6 +12,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import GIF from "gif.js";
 import { parseGIF, decompressFrames } from "gifuct-js";
 
@@ -37,7 +38,7 @@ export default function CaptionGenerator() {
   const [mode, setMode] = useState<CaptionMode>("classic_top");
   const [fontSize, setFontSize] = useState(40);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
-  const [fontFamily, setFontFamily] = useState("Impact");
+  const [fontFamily, setFontFamily] = useLocalStorage("runen:gif-font-family", "Impact");
   const [textColor, setTextColor] = useState("#FFFFFF");
   const [bgColor, setBgColor] = useState("#FFFFFF");
   const [strokeColor, setStrokeColor] = useState("#000000");

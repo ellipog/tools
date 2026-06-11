@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   convertImage,
   getImageInfo,
@@ -140,9 +141,9 @@ function detectFormat(file: File): string | null {
 export default function FileConverter() {
   const jpchars = useMemo(() => jpcharlist, []);
 
-  const [category, setCategory] = useState<FileCategory | null>(null);
-  const [sourceFormat, setSourceFormat] = useState<string>("");
-  const [targetFormat, setTargetFormat] = useState<string>("");
+  const [category, setCategory] = useLocalStorage<FileCategory | null>("runen:converter-category", null);
+  const [sourceFormat, setSourceFormat] = useLocalStorage<string>("runen:converter-source-format", "");
+  const [targetFormat, setTargetFormat] = useLocalStorage<string>("runen:converter-target-format", "");
   const [file, setFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [resultBlob, setResultBlob] = useState<Blob | null>(null);

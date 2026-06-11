@@ -554,6 +554,18 @@ export default function Home() {
         ] satisfies ToolLink[],
       },
       {
+        title: "video",
+        items: [
+          {
+            label: "yt-downloader",
+            href: "/video/yt-downloader",
+            description: "YTダウンローダー",
+            icon: "photo",
+            tags: ["youtube", "download", "video", "audio", "mp4", "m4a", "yt", "downloader", "youtube downloader", "media", "save"],
+          },
+        ] satisfies ToolLink[],
+      },
+      {
         title: "text",
         items: [
           {

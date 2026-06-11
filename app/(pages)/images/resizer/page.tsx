@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getImageInfo } from "@/lib/converters/image";
 
 type ImageFormat = "jpeg" | "png" | "webp";
@@ -24,7 +25,7 @@ export default function ImageResizer() {
   const [width, setWidth] = useState<number>(0);
   const [height, setHeight] = useState<number>(0);
   const [aspectLock, setAspectLock] = useState(true);
-  const [format, setFormat] = useState<ImageFormat>("jpeg");
+  const [format, setFormat] = useLocalStorage<ImageFormat>("runen:resizer-format", "jpeg");
   const [quality, setQuality] = useState(92);
   const [liveEstimate, setLiveEstimate] = useState<string>("");
 

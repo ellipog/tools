@@ -8,6 +8,7 @@ import FileDropZone from "@/components/FileDropZone";
 import AudioPlayer from "@/components/AudioPlayer";
 import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   COLOR_SCHEMES,
   type VisualizerOptions,
@@ -43,8 +44,8 @@ export default function SoundVisualizerPage() {
   const [decoding, setDecoding] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [mode, setMode] = useState<VisualizerMode>("waveform");
-  const [colorScheme, setColorScheme] = useState(COLOR_SCHEME_KEYS[0]);
+  const [mode, setMode] = useLocalStorage<VisualizerMode>("runen:soundviz-mode", "waveform");
+  const [colorScheme, setColorScheme] = useLocalStorage("runen:soundviz-color-scheme", COLOR_SCHEME_KEYS[0]);
   const [timeStart, setTimeStart] = useState(0);
   const [timeEnd, setTimeEnd] = useState(100);
   const [outputWidth, setOutputWidth] = useState(800);

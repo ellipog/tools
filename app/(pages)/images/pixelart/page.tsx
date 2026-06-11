@@ -8,6 +8,7 @@ import Navbar from "@/components/ui/Navbar";
 import CustomColorPicker from "@/components/ColorPicker";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 type ColorData = Record<string, string | undefined>;
 
@@ -15,6 +16,11 @@ const getHex = (obj: ColorData): string => {
   const values = Object.values(obj).filter((v) => v !== undefined);
   return (values[0] as string) || "#000000";
 };
+
+const ALL_COLORS = [
+  ...(freecolors as ColorData[]).map(getHex),
+  ...(premiumcolors as ColorData[]).map(getHex),
+];
 
 const getColorDistance = (
   r1: number,
@@ -58,9 +64,9 @@ export default function PixelArtGenerator() {
 
   const [totalPixelCount, setTotalPixelCount] = useState(0);
   const [useDithering, setUseDithering] = useState(true);
-  const [isAdvanced, setIsAdvanced] = useState(false);
-  const [enabledPresets, setEnabledPresets] = useState<string[]>([]);
-  const [customPalette, setCustomPalette] = useState<string[]>([
+  const [isAdvanced, setIsAdvanced] = useLocalStorage("runen:pixelart-advanced", false);
+  const [enabledPresets, setEnabledPresets] = useLocalStorage<string[]>("runen:pixelart-enabled-presets", ALL_COLORS);
+  const [customPalette, setCustomPalette] = useLocalStorage<string[]>("runen:pixelart-custom-palette", [
     "#000000",
     "#ffffff",
   ]);
@@ -102,13 +108,6 @@ export default function PixelArtGenerator() {
       setWidthInput(targetWidth.toString()); // Re-sync in case of leading zeros
     }
   };
-
-  useEffect(() => {
-    setEnabledPresets([
-      ...(freecolors as ColorData[]).map(getHex),
-      ...(premiumcolors as ColorData[]).map(getHex),
-    ]);
-  }, []);
 
   const activePalette = useMemo(
     () => (isAdvanced ? customPalette : enabledPresets),

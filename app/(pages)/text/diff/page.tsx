@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   computeDiff,
   toSideBySide,
@@ -37,11 +38,11 @@ export default function DiffPage() {
 
   const [textA, setTextA] = useState("");
   const [textB, setTextB] = useState("");
-  const [mode, setMode] = useState<DiffMode>("side-by-side");
-  const [granularity, setGranularity] = useState<DiffGranularity>("line");
-  const [ignoreWhitespace, setIgnoreWhitespace] = useState(false);
-  const [wordWrap, setWordWrap] = useState(false);
-  const [caseSensitive, setCaseSensitive] = useState(true);
+  const [mode, setMode] = useLocalStorage<DiffMode>("runen:diff-mode", "side-by-side");
+  const [granularity, setGranularity] = useLocalStorage<DiffGranularity>("runen:diff-granularity", "line");
+  const [ignoreWhitespace, setIgnoreWhitespace] = useLocalStorage("runen:diff-ignore-whitespace", false);
+  const [wordWrap, setWordWrap] = useLocalStorage("runen:diff-word-wrap", false);
+  const [caseSensitive, setCaseSensitive] = useLocalStorage("runen:diff-case-sensitive", true);
 
   const leftRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);

@@ -1,0 +1,18 @@
+{
+  "name": "yt-downloader",
+  "module": "index.ts",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "youtube-dl-exec": "^3.1.7"
+  },
+  "trustedDependencies": [
+    "youtube-dl-exec"
+  ]
+}

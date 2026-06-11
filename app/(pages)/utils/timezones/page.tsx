@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   getAllTimezones,
   getTimezoneInfo,
@@ -47,13 +48,13 @@ export default function TimezonesPage() {
   const jpchars = useMemo(() => jpcharlist, []);
   const allZones = useMemo(() => getAllTimezones(), []);
 
-  const [zones, setZones] = useState<string[]>(["America/New_York", "Europe/London", "Asia/Tokyo"]);
+  const [zones, setZones] = useLocalStorage<string[]>("runen:timezones-zones", ["America/New_York", "Europe/London", "Asia/Tokyo"]);
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [selectedTime, setSelectedTime] = useState(() => {
     const d = new Date();
     return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
   });
-  const [hour12, setHour12] = useState(false);
+  const [hour12, setHour12] = useLocalStorage("runen:timezones-hour12", false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const [presets, setPresets] = useState<Preset[]>([]);

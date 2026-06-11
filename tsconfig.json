@@ -32,5 +32,5 @@
     "public/workers/gif.worker.js",
     "public/workers/gif.worker.js"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "yt-downloader"]
 }
