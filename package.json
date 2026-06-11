@@ -30,6 +30,7 @@
     "next": "16.2.2",
     "nodemailer": "^8.0.5",
     "opusscript": "^0.1.1",
+    "qr-code-styling": "^1.9.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "scramble-text": "^0.0.9",
