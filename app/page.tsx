@@ -14,7 +14,7 @@ type ToolLink = {
   label: string;
   href: string;
   description?: string;
-  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock";
+  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave";
 };
 
 function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
@@ -371,6 +371,29 @@ function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
           />
         </svg>
       );
+    case "wave":
+      return (
+        <svg
+          className={common}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M3 12a6 6 0 0 1 6 0 6 6 0 0 0 6 0 6 6 0 0 1 6 0"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+          <path
+            d="M3 8a6 6 0 0 1 6 0 6 6 0 0 0 6 0 6 6 0 0 1 6 0"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            opacity="0.4"
+          />
+        </svg>
+      );
     default:
       return (
         <svg
@@ -509,6 +532,12 @@ export default function Home() {
             icon: "layers",
           },
           {
+            label: "sound-visualizer",
+            href: "/images/sound-visualizer",
+            description: "サウンドビジュアライザー",
+            icon: "wave",
+          },
+          {
             label: "resizer",
             href: "/images/resizer",
             description: "リサイザー",
@@ -556,7 +585,7 @@ export default function Home() {
           },
         ] satisfies ToolLink[],
       },
-      {
+{
         title: "files",
         items: [
           {

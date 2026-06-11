@@ -10,7 +10,7 @@ type ToolEntry = {
   label: string;
   href: string;
   description?: string;
-  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock";
+  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave";
   category: string;
 };
 
@@ -43,6 +43,8 @@ function PaletteIcon({ kind }: { kind: ToolEntry["icon"] }) {
       return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M4 12h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M4 17h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>;
     case "clock":
       return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+    case "wave":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12a6 6 0 0 1 6 0 6 6 0 0 0 6 0 6 6 0 0 1 6 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M3 8a6 6 0 0 1 6 0 6 6 0 0 0 6 0 6 6 0 0 1 6 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/></svg>;
     default:
       return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/></svg>;
   }
