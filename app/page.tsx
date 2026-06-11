@@ -586,7 +586,7 @@ export default function Home() {
           },
         ] satisfies ToolLink[],
       },
-{
+      {
         title: "files",
         items: [
           {
@@ -726,7 +726,7 @@ export default function Home() {
             )}
           </div>
 
-          <div className="mt-6 pl-5">
+          <div className="fixed bottom-10 pl-5">
             <DisplayControl />
           </div>
         </div>

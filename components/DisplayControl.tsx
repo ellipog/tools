@@ -42,7 +42,7 @@ export default function DisplayControl() {
   );
 
   return (
-    <div className="flex flex-col gap-2 bg-[#0A0A0A] border border-white/10 px-3 py-2 min-w-[120px]">
+    <div className="flex flex-col gap-2 bg-[#0A0A0A] border border-white/10 px-3 py-2 w-fit">
       <span className="text-[8px] tracking-[0.3em] text-white/20 uppercase leading-none">
         DISPLAY_CTRL
       </span>
@@ -56,11 +56,10 @@ export default function DisplayControl() {
         <span className="text-[8px] text-white/10 select-none">|</span>
         <button
           onClick={crt.toggle}
-          className={`text-xs tracking-[0.3em] uppercase cursor-pointer transition-colors ${
-            crt.enabled
-              ? "text-white"
-              : "text-white/30 hover:text-white/60"
-          }`}
+          className={`text-xs tracking-[0.3em] uppercase cursor-pointer transition-colors ${crt.enabled
+            ? "text-white"
+            : "text-white/30 hover:text-white/60"
+            }`}
         >
           CRT
         </button>
