@@ -374,7 +374,7 @@ export default function BackgroundRemovalGenerator() {
   return (
     <div className="min-h-dvh w-full bg-[#050505] overflow-hidden selection:bg-white selection:text-black">
       <FileDropZone onDrop={handleFileDrop}>
-      <Navbar title="bg-remover" jp="背景削除" category="images" />
+      <Navbar title="bg-remover" jp="背景削除" category="images" href="/images/remove-bg" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12 max-h-[calc(100vh-80px)]">
         <header className="flex justify-end gap-4 border-b border-white/10 pb-8">
           <div className="text-[10px] tracking-[0.3em] text-white/50 uppercase border border-white/10 px-6 py-2 bg-white/5 flex items-center gap-2">

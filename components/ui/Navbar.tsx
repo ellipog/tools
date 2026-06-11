@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
+import PinStar from "@/components/PinStar";
 import { useMemo } from "react";
 import { jpcharlist } from "@/public/data/charlists";
 
@@ -7,9 +8,10 @@ export type HeaderProps = {
   title: string;
   jp: string;
   category: string;
+  href?: string;
 };
 
-export default function Navbar({ title, jp, category }: HeaderProps) {
+export default function Navbar({ title, jp, category, href }: HeaderProps) {
   const jpchars = useMemo(() => jpcharlist, []);
 
   return (
@@ -25,14 +27,17 @@ export default function Navbar({ title, jp, category }: HeaderProps) {
         )}
         <span>/</span>
       </div>
-      <ScrambleText text={title} className="text-3xl tracking-tight" />
-      <ScrambleText
-        text={jp}
-        chars={jpchars}
-        timeOffset={100}
-        autoPlay={true}
-        className="text-xl ml-3 text-white/35 transition-colors"
-      />
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <ScrambleText text={title} className="text-3xl tracking-tight" />
+        <ScrambleText
+          text={jp}
+          chars={jpchars}
+          timeOffset={100}
+          autoPlay={true}
+          className="text-xl text-white/35 transition-colors"
+        />
+        {href && <PinStar href={href} />}
+      </div>
     </div>
   );
 }

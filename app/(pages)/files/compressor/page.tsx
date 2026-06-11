@@ -144,7 +144,7 @@ export default function CompressorPage() {
 
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
-      <Navbar title="compressor" jp="ファイル圧縮" category="files" />
+      <Navbar title="compressor" jp="ファイル圧縮" category="files" href="/files/compressor" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
           initial={{ opacity: 0, y: -20 }}

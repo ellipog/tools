@@ -279,7 +279,7 @@ export default function AsciiArtGenerator() {
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
       <FileDropZone onDrop={handleFileDrop}>
-      <Navbar title="ascii" jp="アスキー" category="images" />
+      <Navbar title="ascii" jp="アスキー" category="images" href="/images/ascii" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
           initial={{ opacity: 0, y: -20 }}

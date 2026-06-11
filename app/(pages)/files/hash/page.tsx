@@ -95,7 +95,7 @@ export default function HashPage() {
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
       <FileDropZone onDrop={handleUpload}>
-        <Navbar title="hash" jp="ハッシュ生成" category="files" />
+        <Navbar title="hash" jp="ハッシュ生成" category="files" href="/files/hash" />
         <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
           <motion.header
             initial={{ opacity: 0, y: -20 }}

@@ -169,7 +169,7 @@ export default function MetadataPage() {
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
       <FileDropZone onDrop={handleUpload}>
-        <Navbar title="metadata" jp="ファイル情報" category="files" />
+        <Navbar title="metadata" jp="ファイル情報" category="files" href="/files/metadata" />
         <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
           <motion.header
             initial={{ opacity: 0, y: -20 }}

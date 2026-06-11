@@ -87,7 +87,7 @@ export default function RegexTesterPage() {
 
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
-      <Navbar title="regex-tester" jp="正規表現" category="text" />
+      <Navbar title="regex-tester" jp="正規表現" category="text" href="/text/regex-tester" />
 
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header

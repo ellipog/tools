@@ -199,7 +199,7 @@ export default function PixelArtGenerator() {
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden">
       <FileDropZone onDrop={handleFileDrop}>
-      <Navbar title="pixel-art" jp="ドット絵" category="images" />
+      <Navbar title="pixel-art" jp="ドット絵" category="images" href="/images/pixelart" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
           initial={{ opacity: 0, y: -20 }}

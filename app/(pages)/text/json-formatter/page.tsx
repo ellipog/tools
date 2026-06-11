@@ -67,7 +67,7 @@ export default function JsonFormatterPage() {
 
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
-      <Navbar title="json-formatter" jp="JSON整形" category="text" />
+      <Navbar title="json-formatter" jp="JSON整形" category="text" href="/text/json-formatter" />
 
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header

@@ -355,7 +355,7 @@ export default function FileConverter() {
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
       <FileDropZone onDrop={handleFileDrop}>
-      <Navbar title="converter" jp="ファイル変換" category="files" />
+      <Navbar title="converter" jp="ファイル変換" category="files" href="/files/converter" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
           initial={{ opacity: 0, y: -20 }}

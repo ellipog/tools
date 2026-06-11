@@ -102,7 +102,7 @@ export default function HexViewerPage() {
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
       <FileDropZone onDrop={handleUpload}>
-        <Navbar title="hex-viewer" jp="16進表示" category="files" />
+        <Navbar title="hex-viewer" jp="16進表示" category="files" href="/files/hex-viewer" />
         <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
           <motion.header
             initial={{ opacity: 0, y: -20 }}

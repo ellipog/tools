@@ -14,7 +14,7 @@ type ToolLink = {
   label: string;
   href: string;
   description?: string;
-  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list";
+  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock";
 };
 
 function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
@@ -347,6 +347,30 @@ function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
           />
         </svg>
       );
+    case "clock":
+      return (
+        <svg
+          className={common}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="9"
+            stroke="currentColor"
+            strokeWidth="1.8"
+          />
+          <path
+            d="M12 7v5l3 3"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
     default:
       return (
         <svg
@@ -484,6 +508,12 @@ export default function Home() {
             description: "GIF字幕",
             icon: "layers",
           },
+          {
+            label: "resizer",
+            href: "/images/resizer",
+            description: "リサイザー",
+            icon: "photo",
+          },
         ] satisfies ToolLink[],
       },
       {
@@ -506,6 +536,23 @@ export default function Home() {
             href: "/text/regex-tester",
             description: "正規表現",
             icon: "search",
+          },
+          {
+            label: "diff",
+            href: "/text/diff",
+            description: "差分",
+            icon: "list",
+          },
+        ] satisfies ToolLink[],
+      },
+      {
+        title: "utils",
+        items: [
+          {
+            label: "timezones",
+            href: "/utils/timezones",
+            description: "タイムゾーン",
+            icon: "clock",
           },
         ] satisfies ToolLink[],
       },
