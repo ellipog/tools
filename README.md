@@ -84,7 +84,7 @@
 - [ ] **11. Undo/Redo History** — Non-destructive editing stack
 - [ ] **12. Homepage Redesign** — Curated grid, search, pinned favorites
 - [ ] **13. Sound Effects Toggle** — Retro UI audio feedback (Web Audio API)
-- [ ] **14. Theme Customization** — Accent colors, CRT intensity, font size
+- [x] **14. Theme Customization** — Accent colors, CRT intensity, font size
 - [ ] **15. Export History Log** — Session export log with re-download
 - [ ] **16. Contextual Help / Tooltips** — Inline explanations for controls
 - [ ] **17. Performance Mode** — Disable animations/CRT for speed

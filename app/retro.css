@@ -316,3 +316,20 @@ html.light.crt-on :where(p, span, a, li, h1, h2, h3, h4, h5, h6, label, button) 
     -0.4px 0 rgba(0, 255, 120, 0.12),
     0.4px 0 rgba(255, 60, 60, 0.12);
 }
+
+/* ============================================================
+   THEME CUSTOMIZATION — driven by inline styles on <html>
+   set via SettingsProvider; no existing colors are modified.
+   ============================================================ */
+
+/* CRT flicker play state (none → paused) */
+.crt-overlay::after {
+  animation-play-state: var(--crt-flicker-state, running);
+}
+
+/* Border style override for all elements */
+html[style*="--border-style"] *,
+html[style*="--border-style"] ::before,
+html[style*="--border-style"] ::after {
+  border-style: var(--border-style) !important;
+}
