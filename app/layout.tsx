@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "@/app/retro.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { SettingsProvider } from "@/components/SettingsProvider";
+import PwaProvider from "@/components/PwaProvider";
 
-export const viewport = {
+export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
@@ -12,12 +13,12 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://runen.no"),
   title: {
     default: "runen",
-    template: "%s // runen", // Changed to double slash for a more technical feel
+    template: "%s // runen",
   },
   description: "A collection of digital tools and artifacts.",
   applicationName: "runen",
+  manifest: "/manifest.webmanifest",
 
-  // Clean robots instructions
   robots: {
     index: true,
     follow: true,
@@ -27,7 +28,6 @@ export const metadata: Metadata = {
     },
   },
 
-  // Discord & Facebook optimization
   openGraph: {
     type: "website",
     url: "https://runen.no",
@@ -38,15 +38,13 @@ export const metadata: Metadata = {
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
   },
 
-  // Twitter/X optimization
   twitter: {
-    card: "summary_large_image", // Shows a bigger card on Discord/Twitter
+    card: "summary_large_image",
     title: "runen",
     description: "Digital tools & artifacts.",
     images: ["/og-image.png"],
   },
 
-  // Additional UX tags
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-touch-icon.png",
@@ -68,8 +66,10 @@ export default function RootLayout({
       <body className={`${nostrutaru.className} min-h-full flex flex-col`}>
         <ThemeProvider>
           <SettingsProvider>
-            <div className="crt-overlay" aria-hidden="true" />
-            <div className="crt-content flex-1">{children}</div>
+            <PwaProvider>
+              <div className="crt-overlay" aria-hidden="true" />
+              <div className="crt-content flex-1">{children}</div>
+            </PwaProvider>
           </SettingsProvider>
         </ThemeProvider>
       </body>

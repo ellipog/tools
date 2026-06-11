@@ -72,7 +72,7 @@
 ## ⬜ Site Features (from SITE_FEATURES.md)
 
 - [x] **01. Light Mode Toggle** — Dark/light theme with localStorage persistence
-- [ ] **02. PWA / Offline Support** — Service worker, manifest, install prompt
+- [x] **02. PWA / Offline Support** — Service worker, manifest, install prompt, offline indicator
 - [ ] **03. Tool Chaining / Pipeline** — Pipe output of one tool into another
 - [ ] **04. Save/Restore Tool State** — Persist inputs/config across sessions
 - [ ] **05. Shareable Output Links** — Encode tool state in URL hash
