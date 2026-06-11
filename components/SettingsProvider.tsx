@@ -67,15 +67,15 @@ export const PRESETS: Preset[] = [
   },
   {
     name: "Crimson",
-    settings: { ...DEFAULT_SETTINGS, accentColor: "#FF6B6B", crtScanlineOpacity: 12 },
+    settings: { ...DEFAULT_SETTINGS, accentColor: "#FF6B6B", backgroundColor: "#2d1b1b", crtScanlineOpacity: 12 },
   },
   {
     name: "Teal",
-    settings: { ...DEFAULT_SETTINGS, accentColor: "#4ECDC4", backgroundColor: "#0A0A0A", crtScanlineOpacity: 4 },
+    settings: { ...DEFAULT_SETTINGS, accentColor: "#4ECDC4", backgroundColor: "#0a1a1a", crtScanlineOpacity: 4 },
   },
   {
     name: "Ocean",
-    settings: { ...DEFAULT_SETTINGS, accentColor: "#45B7D1", backgroundColor: "#050505" },
+    settings: { ...DEFAULT_SETTINGS, accentColor: "#45B7D1", backgroundColor: "#1a1a2e" },
   },
   ];
 

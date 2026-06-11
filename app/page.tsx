@@ -16,6 +16,7 @@ type ToolLink = {
   href: string;
   description?: string;
   icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave";
+  tags?: string[];
 };
 
 function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
@@ -513,36 +514,42 @@ export default function Home() {
             href: "/images/pixelart",
             description: "ドット絵",
             icon: "photo",
+            tags: ["pixel", "art", "sprite", "canvas", "dot", "ドット", "ドット絵", "drawing", "editor", "pixelated", "grid"],
           },
           {
             label: "ascii",
             href: "/images/ascii",
             description: "アスキー",
             icon: "code",
+            tags: ["ascii", "art", "text", "conversion", "character", "アスキーアート", "convert", "ansi", "font"],
           },
           {
             label: "bg-remover",
             href: "/images/remove-bg",
             description: "背景削除",
             icon: "eraser",
+            tags: ["background", "remove", "transparent", "image", "processing", "removebg", "erase", "delete", "ai"],
           },
           {
             label: "gif-captions",
             href: "/images/gif-captions",
             description: "GIF字幕",
             icon: "layers",
+            tags: ["gif", "captions", "subtitles", "text", "overlay", "animation", "字幕", "meme", "caption", "gif maker", "video", "animated", "meme generator", "subtitle"],
           },
           {
             label: "sound-visualizer",
             href: "/images/sound-visualizer",
             description: "サウンドビジュアライザー",
             icon: "wave",
+            tags: ["audio", "waveform", "music", "visualization", "sound", "visualizer", "audio visualizer", "bars", "frequency", "spectrum", "振幅"],
           },
           {
             label: "resizer",
             href: "/images/resizer",
             description: "リサイザー",
             icon: "photo",
+            tags: ["resize", "scale", "dimensions", "size", "width", "height", "image", "crop", "thumbnail", "resize image"],
           },
         ] satisfies ToolLink[],
       },
@@ -554,24 +561,28 @@ export default function Home() {
             href: "/text/references",
             description: "引用",
             icon: "book",
+            tags: ["citation", "sources", "bibliography", "reference", "引用", "cite", "apa", "mla", "format", "生成"],
           },
           {
             label: "json-formatter",
             href: "/text/json-formatter",
             description: "JSON整形",
             icon: "braces",
+            tags: ["json", "format", "beautify", "prettify", "validate", "pretty", "formatter", "json viewer", "tree", "editor", "minify", "parse", "JSON Editor"],
           },
           {
             label: "regex-tester",
             href: "/text/regex-tester",
             description: "正規表現",
             icon: "search",
+            tags: ["regex", "regular expression", "pattern", "matching", "正規表現", "tester", "replace", "find", "regexp", "regex101"],
           },
           {
             label: "diff",
             href: "/text/diff",
             description: "差分",
             icon: "list",
+            tags: ["diff", "compare", "difference", "merge", "差分", "comparison", "patch", "unified", "side by side"],
           },
         ] satisfies ToolLink[],
       },
@@ -583,6 +594,7 @@ export default function Home() {
             href: "/utils/timezones",
             description: "タイムゾーン",
             icon: "clock",
+            tags: ["timezone", "time", "zone", "clock", "world", "utc", "time zone", "gmt", "offset", "converter", "timezone converter", "dst"],
           },
         ] satisfies ToolLink[],
       },
@@ -594,30 +606,35 @@ export default function Home() {
             href: "/files/converter",
             description: "ファイル変換",
             icon: "shuffle",
+            tags: ["convert", "file", "format", "transform", "conversion", "convert file", "video", "audio", "image converter", "media"],
           },
           {
             label: "compressor",
             href: "/files/compressor",
             description: "ファイル圧縮",
             icon: "archive",
+            tags: ["compress", "zip", "archive", "reduce", "gzip", "compression", "圧縮", "compress file", "minify", "compress image", "pdf"],
           },
           {
             label: "hash",
             href: "/files/hash",
             description: "ハッシュ生成",
             icon: "hash",
+            tags: ["hash", "checksum", "md5", "sha", "sha256", "sha1", "crypto", "hash generator", "encrypt", "hash file", "verify", "integrity"],
           },
           {
             label: "metadata",
             href: "/files/metadata",
             description: "ファイル情報",
             icon: "list",
+            tags: ["metadata", "exif", "info", "information", "properties", "file info", "exif viewer", "details", "file details", "edit"],
           },
           {
             label: "hex-viewer",
             href: "/files/hex-viewer",
             description: "16進表示",
             icon: "hex",
+            tags: ["hex", "hexadecimal", "bytes", "binary", "viewer", "16進", "hex editor", "dump", "hexdump", "raw", "data"],
           },
         ] satisfies ToolLink[],
       },
@@ -638,7 +655,7 @@ export default function Home() {
         ...g,
         items: g.items.filter((it) => {
           const hay =
-            `${it.label} ${it.description ?? ""} ${it.href}`.toLowerCase();
+            `${it.label} ${it.description ?? ""} ${it.href} ${(it.tags ?? []).join(" ")}`.toLowerCase();
           return hay.includes(q);
         }),
       }))

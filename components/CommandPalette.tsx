@@ -12,6 +12,7 @@ type ToolEntry = {
   description?: string;
   icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave";
   category: string;
+  tags?: string[];
 };
 
 function PaletteIcon({ kind }: { kind: ToolEntry["icon"] }) {
@@ -70,7 +71,7 @@ export default function CommandPalette({ isOpen, onClose, tools, pins }: Command
     let matched = tools;
     if (q) {
       matched = tools.filter((t) => {
-        const hay = `${t.label} ${t.description ?? ""} ${t.category}`.toLowerCase();
+        const hay = `${t.label} ${t.description ?? ""} ${t.category} ${(t.tags ?? []).join(" ")}`.toLowerCase();
         return hay.includes(q);
       });
     }
