@@ -4,6 +4,7 @@ import { useMemo, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
+import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
 import {
   convertImage,
@@ -90,6 +91,15 @@ const FORMAT_EXT_MAP: Record<string, string[]> = {
   ogg: ["ogg"],
   opus: ["opus"],
   m4a: ["m4a"],
+};
+
+const FORMAT_TO_CATEGORY: Record<string, FileCategory> = {
+  png: "image", jpeg: "image", webp: "image", bmp: "image",
+  gif: "image", avif: "image", svg: "image", ico: "image",
+  json: "data", csv: "data", yaml: "data", xml: "data",
+  markdown: "document", html: "document", txt: "document",
+  wav: "audio", mp3: "audio", flac: "audio", aac: "audio",
+  ogg: "audio", opus: "audio", m4a: "audio",
 };
 
 const FILTERS: { key: ImageFilter; label: string }[] = [
@@ -217,6 +227,49 @@ export default function FileConverter() {
     }
   };
 
+  const handleFileDrop = useCallback(async (f: File) => {
+    setFile(f);
+    setFileName(f.name);
+    setResultBlob(null);
+    setResultText("");
+    setError(null);
+    setPreviewUrl("");
+    setPreviewAudioUrl("");
+    setImageInfo(null);
+    setDataStats(null);
+    setDocStats(null);
+    setAudioInfo(null);
+    setCaseMode(null);
+
+    const detected = detectFormat(f);
+    if (detected) {
+      const cat = FORMAT_TO_CATEGORY[detected];
+      if (cat) {
+        setCategory(cat);
+        setSourceFormat(detected);
+      } else if (sourceFormats.includes(detected)) {
+        setSourceFormat(detected);
+      } else if (sourceFormats.length > 0) {
+        setSourceFormat(sourceFormats[0]);
+      }
+    } else if (sourceFormats.length > 0) {
+      setSourceFormat(sourceFormats[0]);
+    }
+
+    const base = f.name.replace(/\.[^.]+$/, "");
+    setSqlTableName(base.replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase());
+
+    if (detected && FORMAT_TO_CATEGORY[detected] === "image") {
+      try { setImageInfo(await getImageInfo(f)); } catch { /* ignore */ }
+    } else if (f.type.startsWith("image/")) {
+      try { setImageInfo(await getImageInfo(f)); } catch { /* ignore */ }
+    } else if (detected && FORMAT_TO_CATEGORY[detected] === "audio") {
+      try { setAudioInfo(await getAudioInfo(f)); } catch { /* ignore */ }
+    } else if (f.type.startsWith("audio/")) {
+      try { setAudioInfo(await getAudioInfo(f)); } catch { /* ignore */ }
+    }
+  }, [sourceFormats]);
+
   const handleConvert = useCallback(async () => {
     if (!file || !category || !sourceFormat || !targetFormat) return;
     setConverting(true);
@@ -301,6 +354,7 @@ export default function FileConverter() {
 
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
+      <FileDropZone onDrop={handleFileDrop}>
       <Navbar title="converter" jp="ファイル変換" category="files" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
@@ -762,6 +816,7 @@ export default function FileConverter() {
           </motion.main>
         </div>
       </div>
+      </FileDropZone>
     </div>
   );
 }

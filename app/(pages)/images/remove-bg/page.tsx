@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { removeBackground, Config } from "@imgly/background-removal";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
+import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
 
 type ProcessStatus =
@@ -41,9 +42,7 @@ export default function BackgroundRemovalGenerator() {
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const isExportingRef = useRef(false);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processFile = useCallback((file: File) => {
     setSourceFile(file);
     setStatus("idle");
     setProcessedUrl(null);
@@ -56,14 +55,23 @@ export default function BackgroundRemovalGenerator() {
     reader.onload = (event) => {
       const dataUrl = event.target?.result as string;
       setSourcePreview(dataUrl);
-      // Capture natural dimensions so the artboard mirrors the source image
       const img = new Image();
       img.onload = () =>
         setSourceDimensions({ w: img.naturalWidth, h: img.naturalHeight });
       img.src = dataUrl;
     };
     reader.readAsDataURL(file);
+  }, []);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
   };
+
+  const handleFileDrop = useCallback((file: File) => {
+    processFile(file);
+  }, [processFile]);
 
   const handleCustomBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -365,6 +373,7 @@ export default function BackgroundRemovalGenerator() {
 
   return (
     <div className="min-h-dvh w-full bg-[#050505] overflow-hidden selection:bg-white selection:text-black">
+      <FileDropZone onDrop={handleFileDrop}>
       <Navbar title="bg-remover" jp="背景削除" category="images" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12 max-h-[calc(100vh-80px)]">
         <header className="flex justify-end gap-4 border-b border-white/10 pb-8">
@@ -681,6 +690,7 @@ export default function BackgroundRemovalGenerator() {
           </motion.main>
         </div>
       </div>
+      </FileDropZone>
     </div>
   );
 }

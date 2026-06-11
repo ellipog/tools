@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import { freecolors, premiumcolors } from "@/public/data/colors";
 import Navbar from "@/components/ui/Navbar";
 import CustomColorPicker from "@/components/ColorPicker";
+import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
 
 type ColorData = Record<string, string | undefined>;
@@ -114,9 +115,7 @@ export default function PixelArtGenerator() {
     [isAdvanced, customPalette, enabledPresets],
   );
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processFile = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -124,7 +123,17 @@ export default function PixelArtGenerator() {
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  }, []);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
   };
+
+  const handleFileDrop = useCallback((file: File) => {
+    processFile(file);
+  }, [processFile]);
 
   // --- Multi-Select Logic ---
   const toggleGroup = (group: any[]) => {
@@ -189,6 +198,7 @@ export default function PixelArtGenerator() {
 
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden">
+      <FileDropZone onDrop={handleFileDrop}>
       <Navbar title="pixel-art" jp="ドット絵" category="images" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
@@ -487,6 +497,7 @@ export default function PixelArtGenerator() {
           </motion.main>
         </div>
       </div>
+      </FileDropZone>
     </div>
   );
 }

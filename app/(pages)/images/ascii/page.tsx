@@ -10,6 +10,7 @@ import React, {
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
+import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
 
 const ASCII_SETS = {
@@ -76,9 +77,7 @@ export default function AsciiArtGenerator() {
     }
   };
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processFile = useCallback((file: File) => {
     const reader = new FileReader();
     reader.onload = (event) => {
       const img = new Image();
@@ -86,7 +85,17 @@ export default function AsciiArtGenerator() {
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  }, []);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
   };
+
+  const handleFileDrop = useCallback((file: File) => {
+    processFile(file);
+  }, [processFile]);
 
   const generateAscii = useCallback(() => {
     if (!image || !canvasRef.current) return;
@@ -144,6 +153,7 @@ export default function AsciiArtGenerator() {
 
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
+      <FileDropZone onDrop={handleFileDrop}>
       <Navbar title="ascii" jp="アスキー" category="images" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
@@ -332,6 +342,7 @@ export default function AsciiArtGenerator() {
           </motion.main>
         </div>
       </div>
+      </FileDropZone>
     </div>
   );
 }

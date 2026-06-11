@@ -10,6 +10,7 @@ import React, {
 import { motion, AnimatePresence } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
+import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
 import GIF from "gif.js";
 import { parseGIF, decompressFrames } from "gifuct-js";
@@ -214,9 +215,7 @@ export default function CaptionGenerator() {
     return () => cancelAnimationFrame(frameId);
   }, [drawFrame, sourceDimensions, fileType]);
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const processFile = useCallback((file: File) => {
     setSourceFile(file);
     const type = file.type.startsWith("video")
       ? "video"
@@ -247,7 +246,17 @@ export default function CaptionGenerator() {
       media.src = dataUrl;
     };
     reader.readAsDataURL(file);
+  }, []);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    processFile(file);
   };
+
+  const handleFileDrop = useCallback((file: File) => {
+    processFile(file);
+  }, [processFile]);
 
   const handleDownload = async () => {
     if (!sourcePreview || !sourceDimensions) return;
@@ -352,6 +361,7 @@ export default function CaptionGenerator() {
 
   return (
     <div className="min-h-dvh w-full bg-[#050505] overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
+      <FileDropZone onDrop={handleFileDrop}>
       <Navbar title="caption-gen" jp="キャプション" category="media" />
       <div className="h-full text-white p-6 sm:p-12 flex flex-col gap-12">
         <motion.header
@@ -636,6 +646,7 @@ export default function CaptionGenerator() {
           </motion.main>
         </div>
       </div>
+      </FileDropZone>
     </div>
   );
 }
