@@ -7,6 +7,7 @@ import Navbar from "@/components/ui/Navbar";
 import { jpcharlist } from "@/public/data/charlists";
 import FeatureModal from "@/components/RequestFeature";
 import CommandPalette from "@/components/CommandPalette";
+import DisplayControl from "@/components/DisplayControl";
 
 const PINS_KEY = "aaenz:pins";
 
@@ -656,12 +657,9 @@ export default function Home() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 inputMode="search"
-                placeholder="search…"
+                placeholder={`search… — ${platformHint}`}
                 className="border-b border-white/10 w-44 sm:w-56 bg-transparent text-white/80 placeholder:text-white/50 outline-none text-right"
               />
-              <span className="text-[8px] tracking-[0.3em] text-white/20 uppercase shrink-0">
-                {platformHint}
-              </span>
             </label>
           </div>
 
@@ -726,6 +724,10 @@ export default function Home() {
                 no matches found
               </div>
             )}
+          </div>
+
+          <div className="mt-6 pl-5">
+            <DisplayControl />
           </div>
         </div>
       </div>

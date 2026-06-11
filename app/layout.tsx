@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "@/app/retro.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import DisplayControl from "@/components/DisplayControl";
 
 export const viewport = {
   themeColor: "#000000",
@@ -67,7 +66,6 @@ export default function RootLayout({
     <html lang="en" className={`h-full antialiased`}>
       <body className={`${nostrutaru.className} min-h-full flex flex-col`}>
         <ThemeProvider>
-          <DisplayControl />
           <div className="crt-overlay" aria-hidden="true" />
           <div className="crt-content flex-1">{children}</div>
         </ThemeProvider>

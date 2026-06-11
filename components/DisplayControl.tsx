@@ -42,7 +42,7 @@ export default function DisplayControl() {
   );
 
   return (
-    <div className="fixed bottom-6 left-6 z-40 flex flex-col gap-2 bg-[#0A0A0A] border border-white/10 px-3 py-2 min-w-[120px]">
+    <div className="flex flex-col gap-2 bg-[#0A0A0A] border border-white/10 px-3 py-2 min-w-[120px]">
       <span className="text-[8px] tracking-[0.3em] text-white/20 uppercase leading-none">
         DISPLAY_CTRL
       </span>
