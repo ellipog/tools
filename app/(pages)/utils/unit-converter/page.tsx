@@ -212,6 +212,20 @@ const TO_BASE: Record<string, number | ((v: number) => number)> = {
   j: 1, kj: 1000, cal: 4.184, kcal: 4184, wh: 3600, kwh: 3600000, ev: 1.602e-19,
 };
 
+function parseLengthInput(val: string, toUnit: string): number {
+  const t = val.trim();
+  if (!t.includes("'")) return parseFloat(t);
+  const [feetStr, inchesStr] = t.split("'");
+  const feet = parseFloat(feetStr);
+  const inches = parseFloat((inchesStr || "").replace(/"/g, "").trim());
+  if (isNaN(feet)) return NaN;
+  const totalInches = feet * 12 + (isNaN(inches) ? 0 : inches);
+  const meters = totalInches * 0.0254;
+  const factor = TO_BASE[toUnit];
+  if (factor !== undefined && typeof factor === "number") return meters / factor;
+  return meters;
+}
+
 function formatResult(v: number, isCurrency?: boolean): string {
   if (!isFinite(v)) return "—";
   if (isCurrency) return v.toFixed(2);
@@ -284,7 +298,7 @@ export default function UnitConverterPage() {
   const updateFrom = useCallback(
     (val: string) => {
       setFromValue(val);
-      const num = parseFloat(val);
+      const num = category === "length" ? parseLengthInput(val, fromUnit) : parseFloat(val);
       if (isNaN(num) || !fromUnit || !toUnit) {
         setToValue("");
         return;
@@ -299,7 +313,7 @@ export default function UnitConverterPage() {
   const updateTo = useCallback(
     (val: string) => {
       setToValue(val);
-      const num = parseFloat(val);
+      const num = category === "length" ? parseLengthInput(val, toUnit) : parseFloat(val);
       if (isNaN(num) || !fromUnit || !toUnit) {
         setFromValue("");
         return;

@@ -30,6 +30,18 @@ function healthyRange(height: number, unit: Unit): { low: number; high: number }
   return { low: Math.round(18.5 * height * height / 703 * 10) / 10, high: Math.round(24.9 * height * height / 703 * 10) / 10 };
 }
 
+function parseImperialHeight(val: string): number {
+  const t = val.trim();
+  if (t.includes("'")) {
+    const [feetStr, inchesStr] = t.split("'");
+    const feet = parseFloat(feetStr);
+    const inches = parseFloat((inchesStr || "").replace(/"/g, "").trim());
+    if (isNaN(feet)) return NaN;
+    return feet * 12 + (isNaN(inches) ? 0 : inches);
+  }
+  return parseFloat(t) * 12;
+}
+
 function gaugePercent(bmi: number): number {
   if (bmi <= 13) return 0;
   if (bmi >= 40) return 100;
@@ -44,7 +56,7 @@ export default function BMICalculator() {
   const [height, setHeight] = useState("");
 
   const w = parseFloat(weight);
-  const h = parseFloat(height);
+  const h = unit === "imperial" ? parseImperialHeight(height) : parseFloat(height);
   const bmi = calcBMI(w, h, unit);
   const cat = category(bmi);
   const range = healthyRange(h, unit);
@@ -109,7 +121,7 @@ export default function BMICalculator() {
                   className="w-full bg-transparent border border-white/10 text-xs text-white/70 px-4 py-3 outline-none focus:border-white/40 placeholder:text-white/20 uppercase tracking-widest"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-white/30 tracking-widest uppercase">
-                  {unit === "metric" ? "cm" : "in"}
+                  {unit === "metric" ? "cm" : "ft'in"}
                 </span>
               </div>
             </section>

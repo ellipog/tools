@@ -134,6 +134,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<ThemeSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
+    const crtPref = localStorage.getItem("aaenz:crt");
+    document.documentElement.classList.toggle("crt-on", crtPref ? crtPref === "on" : true);
+
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {

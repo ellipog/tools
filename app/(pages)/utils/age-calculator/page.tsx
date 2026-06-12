@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback } from "react";
+import { useMemo, useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
@@ -64,9 +64,29 @@ export default function AgeCalculator() {
   const [birthDate, setBirthDate] = useState("2000-01-01");
   const [includeTime, setIncludeTime] = useState(false);
   const [birthTime, setBirthTime] = useState("09:00");
-  const [now, setNow] = useState(new Date());
+  const [now, setNow] = useState<Date | null>(null);
+  const hydrated = useRef(false);
 
   useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("aaenz:age-calculator");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.birthDate) setBirthDate(parsed.birthDate);
+        if (typeof parsed.includeTime === "boolean") setIncludeTime(parsed.includeTime);
+        if (parsed.birthTime) setBirthTime(parsed.birthTime);
+      }
+    } catch {}
+    hydrated.current = true;
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated.current) return;
+    sessionStorage.setItem("aaenz:age-calculator", JSON.stringify({ birthDate, includeTime, birthTime }));
+  }, [birthDate, includeTime, birthTime]);
+
+  useEffect(() => {
+    setNow(new Date());
     const t = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
@@ -80,13 +100,13 @@ export default function AgeCalculator() {
     return d;
   }, [birthDate, includeTime, birthTime]);
 
-  const age = useMemo(() => calcAge(birth, now), [birth, now]);
-  const daysAlive = useMemo(() => totalDays(birth, now), [birth, now]);
-  const nextBday = useMemo(() => nextBirthday(birth, now), [birth, now]);
+  const age = useMemo(() => now ? calcAge(birth, now) : null, [birth, now]) as Age;
+  const daysAlive = useMemo(() => now ? totalDays(birth, now) : 0, [birth, now]);
+  const nextBday = useMemo(() => now ? nextBirthday(birth, now) : null, [birth, now]) as { days: number; date: string };
   const sign = useMemo(() => zodiac(birth.getMonth() + 1, birth.getDate()), [birth]);
   const totalHeartbeats = useMemo(() => Math.round(daysAlive * 86400 * 1.2), [daysAlive]);
   const totalSleepHours = useMemo(() => daysAlive * 8, [daysAlive]);
-  const isValid = birth <= now;
+  const isValid = now ? birth <= now : false;
 
   return (
     <div className="min-h-dvh w-full bg-black overflow-y-auto overflow-x-hidden selection:bg-white selection:text-black">
@@ -133,7 +153,9 @@ export default function AgeCalculator() {
             animate={{ opacity: 1 }}
             className="lg:col-span-8 flex flex-col bg-white/2 border border-white/5 min-h-[60vh] p-8"
           >
-            {!isValid ? (
+            {!now ? (
+              <div className="flex-1 flex items-center justify-center" />
+            ) : !isValid ? (
               <div className="flex-1 flex items-center justify-center">
                 <ScrambleText text="birth_must_be_in_the_past" className="text-white/10 text-xs tracking-[0.5em] italic" />
               </div>
@@ -189,15 +211,15 @@ export default function AgeCalculator() {
                 {/* FUN STATS */}
                 <div className="flex flex-wrap justify-center gap-6 w-full max-w-lg">
                   <div className="flex-1 min-w-[100px] text-center">
-                    <div className="text-xl text-white tabular-nums">{daysAlive.toLocaleString()}</div>
+                    <div className="text-xl text-white tabular-nums">{daysAlive.toLocaleString("en-US")}</div>
                     <div className="text-[8px] tracking-[0.3em] uppercase text-white/25 mt-1">days alive</div>
                   </div>
                   <div className="flex-1 min-w-[100px] text-center">
-                    <div className="text-xl text-white tabular-nums">{totalSleepHours.toLocaleString()}</div>
+                    <div className="text-xl text-white tabular-nums">{totalSleepHours.toLocaleString("en-US")}</div>
                     <div className="text-[8px] tracking-[0.3em] uppercase text-white/25 mt-1">hours slept</div>
                   </div>
                   <div className="flex-1 min-w-[100px] text-center">
-                    <div className="text-xl text-white tabular-nums">{totalHeartbeats.toLocaleString()}</div>
+                    <div className="text-xl text-white tabular-nums">{totalHeartbeats.toLocaleString("en-US")}</div>
                     <div className="text-[8px] tracking-[0.3em] uppercase text-white/25 mt-1">beats</div>
                   </div>
                   <div className="flex-1 min-w-[100px] text-center">
