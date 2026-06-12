@@ -62,8 +62,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full antialiased`}>
+    <html lang="en" className={`h-full antialiased`} suppressHydrationWarning>
       <body className={`${nostrutaru.className} min-h-full flex flex-col`}>
+        <script dangerouslySetInnerHTML={{ __html: `try{(localStorage.getItem("aaenz:crt")||"on")!=="off"&&document.documentElement.classList.add("crt-on")}catch(e){}` }} />
         <ThemeProvider>
           <SettingsProvider>
             <PwaProvider>
