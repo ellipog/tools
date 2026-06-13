@@ -141,3 +141,44 @@ export function isDST(tz: string, date: Date): boolean {
 export function normalizeHour(hour: number): number {
   return ((hour % 24) + 24) % 24;
 }
+
+export function convertTime(tz: string, targetTz: string, date: Date): Date {
+  const sourceOffset = getOffset(tz, date);
+  const targetOffset = getOffset(targetTz, date);
+  const diff = targetOffset - sourceOffset;
+  return new Date(date.getTime() + diff * 60 * 60 * 1000);
+}
+
+export function getTimezoneOffsetDiff(tz1: string, tz2: string, date: Date): number {
+  return getOffset(tz1, date) - getOffset(tz2, date);
+}
+
+export function getTimezonesByOffset(offset: number, date: Date): string[] {
+  return getAllTimezones().filter((tz) => Math.abs(getOffset(tz, date) - offset) < 0.01);
+}
+
+export function getTimezonesByRegion(region: string): string[] {
+  const prefix = region.endsWith("/") ? region : region + "/";
+  return getAllTimezones().filter((tz) => tz.startsWith(prefix));
+}
+
+export function searchTimezones(query: string, limit: number = 20): string[] {
+  const q = query.toLowerCase();
+  return getAllTimezones()
+    .filter((tz) => tz.toLowerCase().includes(q))
+    .slice(0, limit);
+}
+
+export function getDSTTimezones(date: Date): string[] {
+  return getAllTimezones().filter((tz) => isDST(tz, date));
+}
+
+export function formatDateTime(tz: string, date: Date, hour12: boolean): string {
+  return `${formatDate(tz, date)}, ${formatTime(tz, date, hour12)}`;
+}
+
+export function isBusinessHours(tz: string, date: Date, start: number = 9, end: number = 17): boolean {
+  const offset = getOffset(tz, date);
+  const localHour = normalizeHour(date.getUTCHours() + date.getUTCMinutes() / 60 + offset);
+  return localHour >= start && localHour < end;
+}

@@ -8,6 +8,7 @@ import FileDropZone from "@/components/FileDropZone";
 import AudioPlayer from "@/components/AudioPlayer";
 import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
+import { attributePng, attributeGif } from "@/lib/attribution";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   COLOR_SCHEMES,
@@ -129,9 +130,10 @@ export default function SoundVisualizerPage() {
   const handleExportPng = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    canvas.toBlob((blob) => {
+    canvas.toBlob(async (blob) => {
       if (!blob) return;
-      const url = URL.createObjectURL(blob);
+      const attributed = await attributePng(blob);
+      const url = URL.createObjectURL(attributed);
       const a = document.createElement("a");
       a.href = url;
       a.download = `sound-visualizer-${mode}.png`;
@@ -209,8 +211,9 @@ export default function SoundVisualizerPage() {
       gif.addFrame(offCtx, { copy: true, delay: Math.round(frameDuration * 100) });
     }
 
-    gif.on("finished", (blob: Blob) => {
-      const url = URL.createObjectURL(blob);
+    gif.on("finished", async (blob: Blob) => {
+      const attributed = await attributeGif(blob);
+      const url = URL.createObjectURL(attributed);
       const a = document.createElement("a");
       a.href = url;
       a.download = `sound-visualizer-${mode}.gif`;

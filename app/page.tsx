@@ -15,7 +15,7 @@ type ToolLink = {
   label: string;
   href: string;
   description?: string;
-  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave";
+  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave" | "camera" | "dice" | "circle" | "heart";
   tags?: string[];
 };
 
@@ -396,6 +396,54 @@ function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
           />
         </svg>
       );
+    case "camera":
+      return (
+        <svg
+          className={common}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <circle cx="12" cy="14" r="4" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M17 7 15 4H9L7 7" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <circle cx="12" cy="14" r="1.5" fill="currentColor" />
+        </svg>
+      );
+    case "dice":
+      return (
+        <svg
+          className={common}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+          <circle cx="8" cy="8" r="1" fill="currentColor" />
+          <circle cx="16" cy="8" r="1" fill="currentColor" />
+          <circle cx="12" cy="12" r="1" fill="currentColor" />
+          <circle cx="8" cy="16" r="1" fill="currentColor" />
+          <circle cx="16" cy="16" r="1" fill="currentColor" />
+        </svg>
+      );
+    case "circle":
+      return (
+        <svg
+          className={common}
+          viewBox="0 0 24 24"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M12 8v4l2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      );
+    case "heart":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/>
+        </svg>
+      );
     default:
       return (
         <svg
@@ -544,6 +592,13 @@ export default function Home() {
             icon: "photo",
             tags: ["resize", "scale", "dimensions", "size", "width", "height", "image", "crop", "thumbnail", "resize image"],
           },
+          {
+            label: "photo-booth",
+            href: "/images/photo-booth",
+            description: "フォトブース",
+            icon: "camera",
+            tags: ["photo", "webcam", "camera", "filters", "selfie", "effects", "vintage", "glitch", "photo booth", "snap", "capture", "mirror", "pixelate", "comic", "thermal", "xray", "neon", "emboss", "grayscale"],
+          },
         ] satisfies ToolLink[],
       },
       {
@@ -689,6 +744,32 @@ export default function Home() {
             description: "16進表示",
             icon: "hex",
             tags: ["hex", "hexadecimal", "bytes", "binary", "viewer", "16進", "hex editor", "dump", "hexdump", "raw", "data"],
+          },
+        ] satisfies ToolLink[],
+      },
+      {
+        title: "fun",
+        items: [
+          {
+            label: "bored-button",
+            href: "/fun/bored-button",
+            description: "退屈しのぎ",
+            icon: "dice",
+            tags: ["bored", "fun", "random", "activity", "suggestion", "idea", "bored button", "entertainment", "distraction", "creative", "challenge"],
+          },
+          {
+            label: "magic-8ball",
+            href: "/fun/magic-8ball",
+            description: "マジック８ボール",
+            icon: "circle",
+            tags: ["8ball", "magic", "fortune", "predict", "yes no", "oracle", "ball", "decision", "fun", "game", "ask", "question", "8 ball", "magic 8 ball"],
+          },
+          {
+            label: "matcher",
+            href: "/fun/matcher",
+            description: "相性診断",
+            icon: "heart",
+            tags: ["match", "compatibility", "love", "calculator", "romance", "friendship", "rivalry", "business", "relationship", "pair", "couple", "相性", "診断", "マッチング"],
           },
         ] satisfies ToolLink[],
       },

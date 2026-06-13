@@ -82,8 +82,9 @@ export async function getUrlMetadata(url: string) {
         title: decodeAndClean(title),
         authors: decodeAndClean(author),
         source: decodeAndClean(siteName),
-        year: year || null, // Return null if truly not found, rather than the current year
+        year: year || null,
         url: url,
+        retrievedFrom: "runen.no",
       },
     };
   } catch (error) {

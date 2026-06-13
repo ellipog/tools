@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import ScrambleText from "@/components/ScrambleText";
 import { useMemo } from "react";
 import { jpcharlist } from "@/public/data/charlists";
+import { attributeText } from "@/lib/attribution";
 
 interface ShareButtonProps {
   data: string;
@@ -27,7 +28,7 @@ export default function ShareButton({ data, filename, label }: ShareButtonProps)
 
   const handleDownload = useCallback(() => {
     setStatus("downloading");
-    const blob = new Blob([data], { type: "text/plain" });
+    const blob = new Blob([attributeText(data)], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { attributeBlob, attributeText } from "@/lib/attribution";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import {
   convertImage,
@@ -329,19 +330,20 @@ export default function FileConverter() {
     setResultText(convertCase(resultText, caseMode));
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (resultBlob) {
       const ext = targetFormat === "jpeg" ? "jpg" : targetFormat;
       const base = fileName.replace(/\.[^.]+$/, "") || "converted";
+      const attributed = await attributeBlob(resultBlob);
       const link = document.createElement("a");
       link.download = `${base}.${ext}`;
-      link.href = URL.createObjectURL(resultBlob);
+      link.href = URL.createObjectURL(attributed);
       link.click();
       URL.revokeObjectURL(link.href);
     } else if (resultText) {
       const ext = targetFormat;
       const base = fileName.replace(/\.[^.]+$/, "") || "converted";
-      const blob = new Blob([resultText], { type: "text/plain;charset=utf-8" });
+      const blob = new Blob([attributeText(resultText)], { type: "text/plain;charset=utf-8" });
       const link = document.createElement("a");
       link.download = `${base}.${ext}`;
       link.href = URL.createObjectURL(blob);

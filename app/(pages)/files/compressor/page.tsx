@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import { jpcharlist } from "@/public/data/charlists";
 import JSZip from "jszip";
+import { ATTRIBUTION } from "@/lib/attribution";
 
 type CompressionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 
@@ -114,6 +115,7 @@ export default function CompressorPage() {
         zip.file(file.name, file);
         setProgress(Math.round(((i + 1) / files.length) * 50));
       }
+      (zip as any).comment = ATTRIBUTION;
       const blob = await zip.generateAsync(
         { type: "blob", compression: "DEFLATE", compressionOptions: { level } },
         (meta) => {

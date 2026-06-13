@@ -42,6 +42,7 @@ interface ZoneEntry {
   isDST: boolean;
   sunriseHour: number;
   sunsetHour: number;
+  localHour: number;
 }
 
 export default function TimezonesPage() {
@@ -104,14 +105,10 @@ export default function TimezonesPage() {
         isDST: isDST(id, date),
         sunriseHour: ss?.sunrise ?? 6,
         sunsetHour: ss?.sunset ?? 18,
+        localHour: normalizeHour(date.getUTCHours() + date.getUTCMinutes() / 60 + info.offset),
       };
     });
   }, [zones, date, hour12]);
-
-  const cursorHour = useMemo(() => {
-    const utcHours = date.getUTCHours() + date.getUTCMinutes() / 60;
-    return normalizeHour(utcHours);
-  }, [date]);
 
   const addZone = useCallback((id: string) => {
     setZones((prev) => (prev.length < MAX_ZONES && !prev.includes(id) ? [...prev, id] : prev));
@@ -469,7 +466,7 @@ export default function TimezonesPage() {
                           {/* Cursor line */}
                           <div
                             className="absolute top-0 bottom-0 w-0.5 bg-white/70 z-10 shadow-[0_0_6px_rgba(255,255,255,0.3)]"
-                            style={{ left: `${(cursorHour / 24) * 100}%` }}
+                            style={{ left: `${(entry.localHour / 24) * 100}%` }}
                           >
                             <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-r-[5px] border-b-[6px] border-l-transparent border-r-transparent border-b-white/70" />
                           </div>

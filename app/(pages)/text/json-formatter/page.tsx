@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
+import { attributeText } from "@/lib/attribution";
 import {
   formatJSON,
   tokenizeJSON,
@@ -46,7 +47,7 @@ export default function JsonFormatterPage() {
 
   const handleDownload = useCallback(() => {
     const ext = mode === "yaml" ? "yaml" : "json";
-    const blob = new Blob([result.output], { type: "text/plain" });
+    const blob = new Blob([attributeText(result.output)], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;

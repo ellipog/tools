@@ -40,6 +40,7 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/octet-stream",
         "Content-Disposition": `attachment; filename="download.${ext}"`,
+        "X-Retrieved-From": "runen.no",
       },
     });
   } catch (err: any) {

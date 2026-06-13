@@ -10,6 +10,7 @@ import React, {
 import { motion, AnimatePresence } from "framer-motion";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
+import { attributeGif } from "@/lib/attribution";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -338,10 +339,11 @@ export default function CaptionGenerator() {
       gifEncoder.addFrame(offscreenCanvas, { copy: true, delay: 200 });
     }
 
-    gifEncoder.on("finished", (blob: Blob) => {
+    gifEncoder.on("finished", async (blob: Blob) => {
+      const attributed = await attributeGif(blob);
       const link = document.createElement("a");
       link.download = `meme_${Date.now()}.gif`;
-      link.href = URL.createObjectURL(blob);
+      link.href = URL.createObjectURL(attributed);
       link.click();
       setCopyLabel("done");
       setTimeout(() => setCopyLabel("generate_gif"), 2000);

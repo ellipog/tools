@@ -8,6 +8,7 @@ import Navbar from "@/components/ui/Navbar";
 import CustomColorPicker from "@/components/ColorPicker";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { attributePng } from "@/lib/attribution";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 type ColorData = Record<string, string | undefined>;
@@ -476,10 +477,14 @@ export default function PixelArtGenerator() {
                       dCtx.putImageData(imgData, 0, 0);
 
                       // 4. Trigger download
-                      const link = document.createElement("a");
-                      link.download = `pixelart_${w}x${h}.png`;
-                      link.href = downloadCanvas.toDataURL("image/png");
-                      link.click();
+                      downloadCanvas.toBlob(async (blob) => {
+                        if (!blob) return;
+                        const attributed = await attributePng(blob);
+                        const link = document.createElement("a");
+                        link.download = `pixelart_${w}x${h}.png`;
+                        link.href = URL.createObjectURL(attributed);
+                        link.click();
+                      });
                     }}
                     className="text-[16px] uppercase tracking-widest border-b border-white/20 text-white/50 hover:text-white cursor-pointer"
                   >

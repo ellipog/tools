@@ -6,12 +6,33 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import { jpcharlist } from "@/public/data/charlists";
 
-const WHEEL_COLORS = [
-  "#FF6B6B","#4ECDC4","#45B7D1","#96CEB4","#FFEAA7",
-  "#DDA0DD","#98D8C8","#F7DC6F","#BB8FCE","#85C1E9",
-  "#F0B27A","#82E0AA","#F1948A","#73C6B6","#E59866",
-  "#6C3483","#2E86C1","#1ABC9C","#E74C3C","#F39C12",
-];
+const COLOR_THEMES: Record<string, string[]> = {
+  classic: [
+    "#FF6B6B","#4ECDC4","#45B7D1","#96CEB4","#FFEAA7",
+    "#DDA0DD","#98D8C8","#F7DC6F","#BB8FCE","#85C1E9",
+    "#F0B27A","#82E0AA","#F1948A","#73C6B6","#E59866",
+  ],
+  neon: [
+    "#FF00FF","#00FF00","#FFFF00","#00FFFF","#FF6600",
+    "#FF0066","#00FF66","#6600FF","#FF3366","#33FFCC",
+    "#FF0099","#99FF00","#00CCFF","#FFCC00","#FF44AA",
+  ],
+  pastel: [
+    "#FFB3BA","#BAFFC9","#BAE1FF","#FFFFBA","#E8BAFF",
+    "#FFD4BA","#BAFFF5","#FFC3E0","#C3FFC3","#E0C3FF",
+    "#FFE5D9","#D4F0F0","#F0E6FF","#FFF5C2","#C9E4DE",
+  ],
+  monochrome: [
+    "#222222","#444444","#666666","#888888","#AAAAAA",
+    "#CCCCCC","#DDDDDD","#BBBBBB","#999999","#777777",
+    "#555555","#333333","#EEEEEE","#B0B0B0","#909090",
+  ],
+  ocean: [
+    "#0077B6","#00B4D8","#90E0EF","#CAF0F8","#023E8A",
+    "#0096C7","#48CAE4","#ADE8F4","#03045E","#00A8CC",
+    "#0077B6","#00B4D8","#90E0EF","#48CAE4","#023E8A",
+  ],
+};
 
 export default function RandomPicker() {
   const jpchars = useMemo(() => jpcharlist, []);
@@ -27,9 +48,14 @@ export default function RandomPicker() {
   const [mode, setMode] = useState<"pick" | "spin">("pick");
   const [spinAngle, setSpinAngle] = useState(0);
   const [winnerIndex, setWinnerIndex] = useState<number | null>(null);
+  const [colorTheme, setColorTheme] = useState("classic");
+  const [spinDuration, setSpinDuration] = useState(4000);
+  const [copyLabel, setCopyLabel] = useState("copy_results");
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const angleRef = useRef(0);
   const animFrameRef = useRef<number | null>(null);
+
+  const themeColors = COLOR_THEMES[colorTheme] ?? COLOR_THEMES.classic;
 
   const items = useMemo(() => {
     let list: string[];
@@ -75,10 +101,10 @@ export default function RandomPicker() {
 
     const winnerIdx = Math.floor(Math.random() * items.length);
     const segAngle = 360 / items.length;
-    const targetAngle = 360 - (winnerIdx * segAngle + segAngle / 2);
+    const targetAngle = 360 - (winnerIdx * segAngle + Math.random() * segAngle);
     const fullSpins = 360 * (5 + Math.floor(Math.random() * 3));
     const totalRotation = fullSpins + targetAngle - (angleRef.current % 360);
-    const duration = 4000;
+    const duration = spinDuration;
     const startAngle = angleRef.current;
     const startTime = performance.now();
 
@@ -98,15 +124,19 @@ export default function RandomPicker() {
       }
     };
     animFrameRef.current = requestAnimationFrame(animate);
-  }, [items]);
+  }, [items, spinDuration]);
 
   const copyResults = async () => {
     const text = results.join("\n");
-    try { await navigator.clipboard.writeText(text); } catch { /* ignore */ }
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyLabel("copied!");
+      setTimeout(() => setCopyLabel("copy_results"), 2000);
+    } catch { /* ignore */ }
   };
 
   // ── Draw wheel ──
-  useEffect(() => {
+  const drawWheel = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas || mode !== "spin") return;
     const ctx = canvas.getContext("2d");
@@ -114,6 +144,8 @@ export default function RandomPicker() {
 
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
     ctx.scale(dpr, dpr);
@@ -126,6 +158,14 @@ export default function RandomPicker() {
 
     ctx.clearRect(0, 0, rect.width, rect.height);
 
+    if (items.length === 0) {
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fill();
+      return;
+    }
+
     // Segments
     items.forEach((item, i) => {
       const start = angleRad - Math.PI / 2 + i * segAngle;
@@ -135,7 +175,7 @@ export default function RandomPicker() {
       ctx.moveTo(cx, cy);
       ctx.arc(cx, cy, radius, start, end);
       ctx.closePath();
-      ctx.fillStyle = WHEEL_COLORS[i % WHEEL_COLORS.length];
+      ctx.fillStyle = themeColors[i % themeColors.length];
       ctx.fill();
       ctx.strokeStyle = "rgba(0,0,0,0.25)";
       ctx.lineWidth = 1;
@@ -143,7 +183,8 @@ export default function RandomPicker() {
     });
 
     // Text labels
-    ctx.fillStyle = "#000";
+    const isDark = colorTheme === "monochrome" || colorTheme === "ocean";
+    ctx.fillStyle = isDark ? "#fff" : "#000";
     ctx.font = `bold ${Math.min(14, radius / 12)}px system-ui, monospace`;
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
@@ -181,15 +222,20 @@ export default function RandomPicker() {
       ctx.stroke();
       ctx.shadowBlur = 0;
     }
+  }, [items, spinAngle, winnerIndex, spinning, mode, colorTheme, themeColors]);
 
-    // Empty state
-    if (items.length === 0) {
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
-      ctx.beginPath();
-      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }, [items, spinAngle, winnerIndex, spinning, mode]);
+  useEffect(() => {
+    drawWheel();
+  }, [drawWheel]);
+
+  // Redraw on resize
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || mode !== "spin") return;
+    const observer = new ResizeObserver(() => drawWheel());
+    observer.observe(canvas);
+    return () => observer.disconnect();
+  }, [drawWheel, mode]);
 
   // Cleanup animation on unmount
   useEffect(() => {
@@ -307,7 +353,65 @@ export default function RandomPicker() {
               </button>
             </section>
 
-            {/* 03. ACTION */}
+            {/* 03. COLORS (SPIN mode only) */}
+            {mode === "spin" && (
+              <section className="space-y-4">
+                <div className="text-[14px] text-white/70 tracking-[0.2em] uppercase mb-4">
+                  03. colors{" "}
+                  <ScrambleText text={"カラーテーマ"} chars={jpchars} timeOffset={100} autoPlay className="text-sm text-white/35" />
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.keys(COLOR_THEMES).map((theme) => (
+                    <button
+                      key={theme}
+                      onClick={() => setColorTheme(theme)}
+                      className={`flex items-center gap-2 text-[10px] px-3 py-1.5 border tracking-[0.1em] transition-all ${
+                        colorTheme === theme
+                          ? "bg-white text-black border-white font-bold"
+                          : "border-white/10 text-white/30 hover:border-white/40 hover:bg-white/5"
+                      }`}
+                    >
+                      <span className="flex gap-px">
+                        {COLOR_THEMES[theme].slice(0, 4).map((c, i) => (
+                          <span key={i} className="w-2 h-2 inline-block" style={{ backgroundColor: c }} />
+                        ))}
+                      </span>
+                      {theme}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* 04. SPIN SPEED (SPIN mode only) */}
+            {mode === "spin" && (
+              <section className="space-y-4">
+                <div className="text-[14px] text-white/70 tracking-[0.2em] uppercase mb-4">
+                  04. spin speed{" "}
+                  <ScrambleText text={"回転速度"} chars={jpchars} timeOffset={100} autoPlay className="text-sm text-white/35" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min={1500}
+                    max={7000}
+                    step={500}
+                    value={spinDuration}
+                    onChange={(e) => setSpinDuration(Number(e.target.value))}
+                    className="w-full accent-white bg-white/10 h-px appearance-none cursor-pointer"
+                  />
+                  <span className="text-[10px] text-white/50 font-mono w-10 text-right">
+                    {(spinDuration / 1000).toFixed(1)}s
+                  </span>
+                </div>
+                <div className="flex justify-between text-[8px] tracking-widest text-white/20 uppercase">
+                  <span>fast</span>
+                  <span>slow</span>
+                </div>
+              </section>
+            )}
+
+            {/* 05. ACTION */}
             <button
               onClick={handleAction}
               disabled={items.length === 0 || spinning}
@@ -322,7 +426,7 @@ export default function RandomPicker() {
             animate={{ opacity: 1 }}
             className="lg:col-span-8 flex flex-col items-center justify-center bg-white/2 border border-white/5 min-h-[60vh] p-8"
           >
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
               {mode === "pick" ? (
                 /* ── PICK MODE ── */
                 <motion.div
@@ -330,7 +434,7 @@ export default function RandomPicker() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex flex-col items-center gap-6 w-full"
+                  className="flex flex-col items-center gap-6 w-full overflow-hidden"
                 >
                   {spinning ? (
                     <div className="text-4xl sm:text-6xl font-light text-white tabular-nums tracking-wider">
@@ -356,7 +460,7 @@ export default function RandomPicker() {
                         onClick={copyResults}
                         className="text-[10px] tracking-[0.3em] uppercase border border-white/10 px-4 py-2 text-white/40 hover:text-white hover:border-white/40 transition-all"
                       >
-                        copy_results
+                        {copyLabel}
                       </button>
                     </div>
                   ) : (
@@ -373,15 +477,17 @@ export default function RandomPicker() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex flex-col items-center gap-6 w-full"
+                  className="flex flex-col items-center gap-6 w-full overflow-hidden"
                 >
                   {/* Arrow indicator */}
                   <div className="w-0 h-0 border-l-[14px] border-r-[14px] border-t-[20px] border-l-transparent border-r-transparent border-t-white -mb-1 z-10" />
                   {/* Canvas wheel */}
-                  <canvas
-                    ref={canvasRef}
-                    className="w-full max-w-[500px] aspect-square"
-                  />
+                  <div className="w-full max-w-[500px] mx-auto aspect-square">
+                    <canvas
+                      ref={canvasRef}
+                      className="w-full h-full"
+                    />
+                  </div>
                   {/* Legend */}
                   {items.length > 0 && (
                     <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center max-w-md text-[10px] tracking-wider uppercase">
@@ -389,7 +495,7 @@ export default function RandomPicker() {
                         <span key={i} className="flex items-center gap-1.5 text-white/50">
                           <span
                             className="w-2.5 h-2.5 inline-block"
-                            style={{ backgroundColor: WHEEL_COLORS[i % WHEEL_COLORS.length] }}
+                            style={{ backgroundColor: themeColors[i % themeColors.length] }}
                           />
                           {item.length > 16 ? item.slice(0, 16) + "…" : item}
                         </span>

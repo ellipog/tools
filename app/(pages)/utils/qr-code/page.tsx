@@ -50,6 +50,7 @@ export default function QRCodeGenerator() {
   const [dotStyle, setDotStyle] = useState<string>("square");
   const [fgColor, setFgColor] = useState("#ffffff");
   const [bgColor, setBgColor] = useState("#000000");
+  const [noBg, setNoBg] = useState(false);
   const [logoFile, setLogoFile] = useState<string>("");
   const [logoSize, setLogoSize] = useState(0.3);
   const [logoMargin, setLogoMargin] = useState(4);
@@ -71,7 +72,7 @@ export default function QRCodeGenerator() {
         margin: 0,
         qrOptions: { errorCorrectionLevel: ecc },
         dotsOptions: { type: dotStyle, color: fgColor },
-        backgroundOptions: { color: bgColor },
+        backgroundOptions: noBg ? {} : { color: bgColor },
         cornersSquareOptions: { type: cornerStyle, color: fgColor },
         cornersDotOptions: { type: cornerStyle, color: fgColor },
         imageOptions: {
@@ -297,6 +298,17 @@ export default function QRCodeGenerator() {
                     <div className="text-[11px] font-mono text-white/60">{bgColor}</div>
                   </div>
                 </div>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <input
+                    type="checkbox"
+                    checked={noBg}
+                    onChange={(e) => setNoBg(e.target.checked)}
+                    className="accent-white"
+                  />
+                  <span className="text-[10px] tracking-widest uppercase text-white/40 group-hover:text-white/60 transition-colors">
+                    transparent background
+                  </span>
+                </label>
               </div>
             </section>
 

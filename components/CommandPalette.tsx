@@ -10,7 +10,7 @@ type ToolEntry = {
   label: string;
   href: string;
   description?: string;
-  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave";
+  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave" | "camera" | "dice" | "circle" | "heart";
   category: string;
   tags?: string[];
 };
@@ -46,6 +46,14 @@ function PaletteIcon({ kind }: { kind: ToolEntry["icon"] }) {
       return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
     case "wave":
       return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12a6 6 0 0 1 6 0 6 6 0 0 0 6 0 6 6 0 0 1 6 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M3 8a6 6 0 0 1 6 0 6 6 0 0 0 6 0 6 6 0 0 1 6 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.4"/></svg>;
+    case "camera":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><circle cx="12" cy="14" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M17 7 15 4H9L7 7" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><circle cx="12" cy="14" r="1.5" fill="currentColor"/></svg>;
+    case "dice":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="16" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="8" cy="16" r="1" fill="currentColor"/><circle cx="16" cy="16" r="1" fill="currentColor"/></svg>;
+    case "circle":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/><path d="M12 8v4l2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+    case "heart":
+      return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/></svg>;
     default:
       return <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8"/></svg>;
   }
@@ -61,6 +69,7 @@ interface CommandPaletteProps {
 export default function CommandPalette({ isOpen, onClose, tools, pins }: CommandPaletteProps) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -93,6 +102,12 @@ export default function CommandPalette({ isOpen, onClose, tools, pins }: Command
   useEffect(() => {
     setSelectedIndex(0);
   }, [query]);
+
+  useEffect(() => {
+    if (!listRef.current || filtered.length === 0) return;
+    const el = listRef.current.querySelector(`[data-index="${selectedIndex}"]`) as HTMLElement | null;
+    el?.scrollIntoView({ block: "nearest" });
+  }, [selectedIndex, filtered.length]);
 
   const navigate = useCallback((href: string) => {
     onClose();
@@ -147,7 +162,7 @@ export default function CommandPalette({ isOpen, onClose, tools, pins }: Command
               </div>
             </div>
 
-            <div className="max-h-[50vh] overflow-y-auto custom-scrollbar">
+            <div ref={listRef} className="max-h-[50vh] overflow-y-auto custom-scrollbar">
               {filtered.length === 0 ? (
                 <div className="p-6 text-center">
                   <ScrambleText
@@ -162,6 +177,7 @@ export default function CommandPalette({ isOpen, onClose, tools, pins }: Command
 {filtered.map((tool, i) => (
                       <button
                         key={tool.href}
+                        data-index={i}
                         onClick={() => navigate(tool.href)}
                         onMouseEnter={() => setSelectedIndex(i)}
                         className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors cursor-pointer ${

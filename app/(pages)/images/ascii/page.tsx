@@ -13,6 +13,7 @@ import Navbar from "@/components/ui/Navbar";
 import FileDropZone from "@/components/FileDropZone";
 import ShareButton from "@/components/ShareButton";
 import { jpcharlist } from "@/public/data/charlists";
+import { attributePng } from "@/lib/attribution";
 
 const ASCII_SETS = {
   standard:
@@ -247,9 +248,10 @@ export default function AsciiArtGenerator() {
         }
       }
 
-      exportCanvas.toBlob((blob) => {
+      exportCanvas.toBlob(async (blob) => {
         if (!blob) return;
-        const url = URL.createObjectURL(blob);
+        const attributed = await attributePng(blob);
+        const url = URL.createObjectURL(attributed);
         const a = document.createElement("a");
         a.href = url;
         a.download = withBackground

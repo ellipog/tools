@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { downloadBlob } from "@/lib/attribution";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { getImageInfo } from "@/lib/converters/image";
 
@@ -207,11 +208,7 @@ export default function ImageResizer() {
   const handleDownload = () => {
     if (!resultBlob) return;
     const extMap: Record<ImageFormat, string> = { jpeg: "jpg", png: "png", webp: "webp" };
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(resultBlob);
-    a.download = `resized_${width}x${height}.${extMap[format]}`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    downloadBlob(resultBlob, `resized_${width}x${height}.${extMap[format]}`);
   };
 
   const handleSliderMove = useCallback((clientX: number) => {

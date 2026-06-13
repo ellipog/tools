@@ -1,3 +1,4 @@
+import CrtInit from "@/components/CrtInit";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "@/app/retro.css";
@@ -61,7 +62,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full antialiased`} suppressHydrationWarning>
       <body className={`${nostrutaru.className} min-h-full flex flex-col`}>
-        <script dangerouslySetInnerHTML={{ __html: `try{(localStorage.getItem("aaenz:crt")||"on")!=="off"&&document.documentElement.classList.add("crt-on")}catch(e){}` }} />
+        <CrtInit />
         <ThemeProvider>
           <SettingsProvider>
             <PwaProvider>

@@ -7,6 +7,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import FileDropZone from "@/components/FileDropZone";
 import { jpcharlist } from "@/public/data/charlists";
+import { attributePng } from "@/lib/attribution";
 
 type ProcessStatus =
   | "idle"
@@ -139,7 +140,7 @@ export default function BackgroundRemovalGenerator() {
       return;
     }
 
-    const onAllLoaded = () => {
+    const onAllLoaded = async () => {
       if (!isExportingRef.current) return;
 
       let exportW: number;
@@ -248,9 +249,12 @@ export default function BackgroundRemovalGenerator() {
             cropH,
           );
 
+          const cropRes = await fetch(cropped.toDataURL("image/png"));
+          const cropBlob = await cropRes.blob();
+          const cropAttributed = await attributePng(cropBlob);
           const link = document.createElement("a");
           link.download = `bgremoved_${Date.now()}.png`;
-          link.href = cropped.toDataURL("image/png");
+          link.href = URL.createObjectURL(cropAttributed);
           link.click();
           isExportingRef.current = false;
           return;
@@ -258,9 +262,12 @@ export default function BackgroundRemovalGenerator() {
       }
 
       // Normal download (solid color, custom bg, or empty transparent case)
+      const res = await fetch(canvas.toDataURL("image/png"));
+      const blob = await res.blob();
+      const attributed = await attributePng(blob);
       const link = document.createElement("a");
       link.download = `bgremoved_${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.href = URL.createObjectURL(attributed);
       link.click();
 
       isExportingRef.current = false;

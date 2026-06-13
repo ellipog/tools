@@ -41,6 +41,7 @@ export async function POST(request: Request) {
       viewCount: info.view_count,
       likeCount: info.like_count,
       formats,
+      retrievedFrom: "runen.no",
     });
   } catch (err: any) {
     console.error("youtube-dl info error:", err.message);
