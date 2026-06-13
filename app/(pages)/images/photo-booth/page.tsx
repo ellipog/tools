@@ -666,9 +666,6 @@ export default function PhotoBoothPage() {
     const srcCanvas = srcCanvasRef.current;
     const srcCtx = srcCanvas.getContext("2d", { willReadFrequently: true })!;
 
-    const procCanvas = document.createElement("canvas");
-    const procCtx = procCanvas.getContext("2d")!;
-
     let lastPw = 0, lastPh = 0;
 
     const loop = () => {
@@ -685,25 +682,13 @@ export default function PhotoBoothPage() {
         return;
       }
 
-      // Compute processing resolution preserving camera aspect ratio
-      const maxDim = 320;
-      let pw: number, ph: number;
-      if (vw > vh) {
-        pw = maxDim;
-        ph = Math.round((vh / vw) * maxDim);
-      } else {
-        ph = maxDim;
-        pw = Math.round((vw / vh) * maxDim);
-      }
-      if (pw < 1) pw = 1;
-      if (ph < 1) ph = 1;
+      // Use camera's native resolution for full quality
+      let pw = vw, ph = vh;
 
       // Resize canvases if aspect ratio changed
       if (pw !== lastPw || ph !== lastPh) {
         srcCanvas.width = pw;
         srcCanvas.height = ph;
-        procCanvas.width = pw;
-        procCanvas.height = ph;
         lastPw = pw;
         lastPh = ph;
         // Update all cell canvases
@@ -728,7 +713,6 @@ export default function PhotoBoothPage() {
       }
 
       srcCtx.drawImage(video, 0, 0, pw, ph);
-      const sourceData = srcCtx.getImageData(0, 0, pw, ph);
 
       for (let i = 0; i < cellCount; i++) {
         const canvas = cellCanvasRefs.current[i];
@@ -746,8 +730,7 @@ export default function PhotoBoothPage() {
         } else {
           const data = srcCtx.getImageData(0, 0, pw, ph);
           applyFilter(data, fid, pixelSize, frameCountRef.current);
-          procCtx.putImageData(data, 0, 0);
-          ctx.drawImage(procCanvas, 0, 0, canvas.width, canvas.height);
+          ctx.putImageData(data, 0, 0);
         }
       }
 
@@ -902,11 +885,10 @@ export default function PhotoBoothPage() {
                   <button
                     key={gl.label}
                     onClick={() => changeGrid(gl.rows, gl.cols)}
-                    className={`text-[10px] px-3 py-1.5 border tracking-[0.1em] transition-all ${
-                      gridLayout.rows === gl.rows && gridLayout.cols === gl.cols
-                        ? "bg-white text-black border-white font-bold"
-                        : "border-white/10 text-white/30 hover:border-white/40 hover:bg-white/5"
-                    }`}
+                    className={`text-[10px] px-3 py-1.5 border tracking-[0.1em] transition-all ${gridLayout.rows === gl.rows && gridLayout.cols === gl.cols
+                      ? "bg-white text-black border-white font-bold"
+                      : "border-white/10 text-white/30 hover:border-white/40 hover:bg-white/5"
+                      }`}
                   >
                     {gl.label}
                   </button>
@@ -928,11 +910,10 @@ export default function PhotoBoothPage() {
                   <button
                     key={f.id}
                     onClick={() => setCellFilter(f.id)}
-                    className={`text-[10px] px-2 py-2 border tracking-[0.1em] transition-all ${
-                      cellFilters[selectedCell] === f.id
-                        ? "bg-white text-black border-white font-bold"
-                        : "border-white/10 text-white/30 hover:border-white/40 hover:bg-white/5"
-                    }`}
+                    className={`text-[10px] px-2 py-2 border tracking-[0.1em] transition-all ${cellFilters[selectedCell] === f.id
+                      ? "bg-white text-black border-white font-bold"
+                      : "border-white/10 text-white/30 hover:border-white/40 hover:bg-white/5"
+                      }`}
                   >
                     {f.label}
                   </button>
@@ -971,9 +952,8 @@ export default function PhotoBoothPage() {
               <button
                 onClick={capture}
                 disabled={cameraStatus !== "active"}
-                className={`w-full aspect-square max-w-[120px] mx-auto rounded-full border-2 border-white/50 flex items-center justify-center transition-all ${
-                  snapping ? "scale-95 border-white brightness-150" : "hover:border-white hover:bg-white/5"
-                } disabled:opacity-20 disabled:cursor-not-allowed`}
+                className={`w-full aspect-square max-w-[120px] mx-auto rounded-full border-2 border-white/50 flex items-center justify-center transition-all ${snapping ? "scale-95 border-white brightness-150" : "hover:border-white hover:bg-white/5"
+                  } disabled:opacity-20 disabled:cursor-not-allowed`}
               >
                 <div className="w-10 h-10 rounded-full bg-white" />
               </button>
@@ -1018,7 +998,7 @@ export default function PhotoBoothPage() {
             {/* Canvas grid */}
             {cameraStatus === "active" && (
               <div
-                className="w-full max-w-[700px] mx-auto"
+                className="w-full max-w-[100%] mx-auto"
                 style={{
                   display: "grid",
                   gridTemplateColumns: `repeat(${gridLayout.cols}, 1fr)`,
@@ -1029,11 +1009,10 @@ export default function PhotoBoothPage() {
                   <div
                     key={i}
                     onClick={() => setSelectedCell(i)}
-                    className={`relative cursor-pointer transition-all ${
-                      selectedCell === i
-                        ? "ring-2 ring-white"
-                        : "ring-1 ring-white/10 hover:ring-white/30"
-                    }`}
+                    className={`relative cursor-pointer transition-all ${selectedCell === i
+                      ? "ring-2 ring-white"
+                      : "ring-1 ring-white/10 hover:ring-white/30"
+                      }`}
                   >
                     <canvas
                       ref={(el) => { cellCanvasRefs.current[i] = el; }}
