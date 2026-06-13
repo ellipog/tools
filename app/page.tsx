@@ -494,6 +494,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [showFeatureRequest, setShowFeatureRequest] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [pins, setPins] = useState<string[]>([]);
   const [platformHint, setPlatformHint] = useState("ctrl+k");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -802,7 +803,7 @@ export default function Home() {
           },
         ] satisfies ToolLink[],
       },
-    ] as const;
+    ];
   }, []);
 
   const allTools = useMemo(() => {
@@ -813,8 +814,12 @@ export default function Home() {
 
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return groups;
-    return groups
+    let base = groups;
+    if (selectedCategory) {
+      base = base.filter((g) => g.title === selectedCategory);
+    }
+    if (!q) return base;
+    return base
       .map((g) => ({
         ...g,
         items: g.items.filter((it) => {
@@ -824,27 +829,90 @@ export default function Home() {
         }),
       }))
       .filter((g) => g.items.length > 0);
-  }, [groups, query]);
+  }, [groups, query, selectedCategory]);
+
+  function ToolItem({ item }: { item: ToolLink & { category?: string } }) {
+    return (
+      <li className="hover:bg-white/[0.03] -mx-2 px-2 py-0.5 rounded-sm transition-colors">
+        <Link
+          href={item.href}
+          className="group inline-flex items-baseline gap-2 text-white/70 hover:text-white transition-colors cursor-pointer"
+        >
+          <span className="translate-y-px">
+            <LinkIcon kind={item.icon} />
+          </span>
+          <span className="text-lg leading-none">
+            {item.label}
+          </span>
+          {item.description ? (
+            <ScrambleText
+              text={item.description}
+              chars={jpchars}
+              timeOffset={100}
+              autoPlay={true}
+              className="text-sm text-white/35 group-hover:text-white/45 transition-colors"
+            />
+          ) : null}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              togglePin(item.href);
+            }}
+            className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer"
+            aria-label={
+              pins.includes(item.href)
+                ? `Unpin ${item.label}`
+                : `Pin ${item.label}`
+            }
+          >
+            <StarIcon filled={pins.includes(item.href)} className="-mt-0.5" />
+          </button>
+        </Link>
+      </li>
+    );
+  }
 
   return (
     <div className="min-h-screen">
       <Navbar title="home" jp="ホーム" category="" />
       <div className="h-screen bg-black text-white flex flex-col">
         <div className="w-full px-6 py-12">
-          <div className="flex w-full justify-end gap-6 pb-4">
-            <label className="flex items-center gap-2 text-md text-white/70 pr-8">
+          <div className="flex flex-col items-center gap-2 pb-6">
+            <label className="flex items-center gap-2 text-md text-white/70">
+              <svg className="h-3.5 w-3.5 shrink-0 opacity-40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="10.5" cy="10.5" r="5.5" stroke="currentColor" strokeWidth="1.8" />
+                <path d="M20 20l-4.35-4.35" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 inputMode="search"
-                placeholder={`search… — ${platformHint}`}
-                className="border-b border-white/10 w-44 sm:w-56 bg-transparent text-white/80 placeholder:text-white/50 outline-none text-right"
+                placeholder={`search ${allTools.length} tools… — ${platformHint}`}
+                className="border-b border-white/10 w-64 sm:w-80 bg-transparent text-white/80 placeholder:text-white/50 outline-none text-center"
               />
             </label>
           </div>
 
-          <div className="mt-6 pl-5 h-[calc(100vh-250px)] overflow-y-hidden overflow-x-auto custom-scrollbar">
+          <div className="flex justify-center gap-2 pb-6 text-xs tracking-[0.22em] uppercase">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`transition-colors cursor-pointer ${!selectedCategory ? 'text-white' : 'text-white/40 hover:text-white/60'}`}
+            >* all</button>
+            {groups.map((g) => (
+              <button
+                key={g.title}
+                onClick={() => setSelectedCategory(selectedCategory === g.title ? null : g.title)}
+                className={`transition-colors cursor-pointer flex items-center gap-2 ${selectedCategory === g.title ? 'text-white' : 'text-white/40 hover:text-white/60'}`}
+              >
+                <span className="text-white/15 pointer-events-none">/</span>
+                {g.title}
+              </button>
+            ))}
+          </div>
+
+          <div className="mt-2 pl-5 h-[calc(100vh-320px)] overflow-y-hidden overflow-x-auto custom-scrollbar">
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-x-10 h-full [column-fill:auto]">
               {filteredGroups.map((group) => (
                 <section
@@ -857,43 +925,7 @@ export default function Home() {
                   </div>
                   <ul className="mt-3 space-y-2.5">
                     {group.items.map((item) => (
-                      <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          className="group inline-flex items-baseline gap-2 text-white/70 hover:text-white transition-colors cursor-pointer"
-                        >
-                          <span className="translate-y-px">
-                            <LinkIcon kind={item.icon} />
-                          </span>
-                          <span className="text-lg leading-none">
-                            {item.label}
-                          </span>
-                          {item.description ? (
-                            <ScrambleText
-                              text={item.description}
-                              chars={jpchars}
-                              timeOffset={100}
-                              autoPlay={true}
-                              className="text-sm text-white/35 group-hover:text-white/45 transition-colors"
-                            />
-                          ) : null}
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              togglePin(item.href);
-                            }}
-                            className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer"
-                            aria-label={
-                              pins.includes(item.href)
-                                ? `Unpin ${item.label}`
-                                : `Pin ${item.label}`
-                            }
-                          >
-                            <StarIcon filled={pins.includes(item.href)} className="-mt-0.5" />
-                          </button>
-                        </Link>
-                      </li>
+                      <ToolItem key={item.href} item={item} />
                     ))}
                   </ul>
                 </section>
@@ -902,7 +934,23 @@ export default function Home() {
 
             {filteredGroups.length === 0 && (
               <div className="mt-10 text-sm text-white/45 text-center">
-                no matches found
+                {query ? (
+                  <>
+                    <p>no matches for "<span className="text-white/60">{query}</span>"</p>
+                    <button
+                      onClick={() => { setQuery(""); setSelectedCategory(null); }}
+                      className="mt-2 text-white/50 hover:text-white underline cursor-pointer"
+                    >clear filters</button>
+                  </>
+                ) : (
+                  <>
+                    <p>no tools in this category</p>
+                    <button
+                      onClick={() => setSelectedCategory(null)}
+                      className="mt-2 text-white/50 hover:text-white underline cursor-pointer"
+                    >show all</button>
+                  </>
+                )}
               </div>
             )}
           </div>
