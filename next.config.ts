@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    staleTimes: {
+      static: 30,
+    },
+  },
   async headers() {
     return [
       {

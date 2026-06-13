@@ -39,6 +39,10 @@ export default function PwaProvider({
       navigator.serviceWorker
         .register("/sw.js", { scope: "/", updateViaCache: "none" })
         .catch(() => {});
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        window.location.reload();
+      });
     }
 
     return () => {
