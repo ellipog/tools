@@ -11,11 +11,11 @@ import DisplayControl from "@/components/DisplayControl";
 
 const PINS_KEY = "aaenz:pins";
 
-type ToolLink = {
+  type ToolLink = {
   label: string;
   href: string;
   description?: string;
-  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave" | "camera" | "dice" | "circle" | "heart";
+  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave" | "camera" | "dice" | "circle" | "coin" | "heart";
   tags?: string[];
 };
 
@@ -438,6 +438,14 @@ function LinkIcon({ kind }: { kind: ToolLink["icon"] }) {
           <path d="M12 8v4l2 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
+    case "coin":
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.8" />
+          <circle cx="12" cy="12" r="7" stroke="currentColor" strokeWidth="1" strokeDasharray="2 2" />
+          <path d="M12 7v10M7 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      );
     case "heart":
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -658,6 +666,13 @@ export default function Home() {
             icon: "code",
             tags: ["zalgo", "cursed", "text", "corrupt", "unicode", "glitch", "weird", "font", "fancy", "morse", "spoiler", "upside down", "cursed text", "corrupted", "discord", "discord text", "markdown", "formatting", "regional indicator", "emoji letters", "fullwidth", "bubble", "fraktur", "double struck", "script", "small caps", "strikethrough"],
           },
+          {
+            label: "typing-speed",
+            href: "/text/typing-speed",
+            description: "タイピング速度",
+            icon: "clock",
+            tags: ["typing", "speed", "wpm", "test", "typing test", "keyboard", "practice", "words", "typing speed", "wpm test", "accuracy"],
+          },
         ] satisfies ToolLink[],
       },
       {
@@ -704,6 +719,13 @@ export default function Home() {
             description: "ランダム選択",
             icon: "shuffle",
             tags: ["random", "picker", "choose", "decision", "lottery", "raffle", "draw", "select", "giveaway", "randomizer", "wheel", "spin", "roulette", "decision wheel", "spinning wheel", "random picker", "pick a winner"],
+          },
+          {
+            label: "password-generator",
+            href: "/utils/password-generator",
+            description: "パスワード生成",
+            icon: "hash",
+            tags: ["password", "generator", "random", "secure", "crypto", "pass", "パスワード", "生成", "セキュリティ", "auth"],
           },
         ] satisfies ToolLink[],
       },
@@ -770,6 +792,13 @@ export default function Home() {
             description: "相性診断",
             icon: "heart",
             tags: ["match", "compatibility", "love", "calculator", "romance", "friendship", "rivalry", "business", "relationship", "pair", "couple", "相性", "診断", "マッチング"],
+          },
+          {
+            label: "coin-flip",
+            href: "/fun/coin-flip",
+            description: "コインフリップ",
+            icon: "coin",
+            tags: ["coin", "flip", "heads", "tails", "random", "luck", "decision", "coin flip", "coin toss", "flip a coin"],
           },
         ] satisfies ToolLink[],
       },

@@ -10,7 +10,7 @@ type ToolEntry = {
   label: string;
   href: string;
   description?: string;
-  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave" | "camera" | "dice" | "circle" | "heart";
+  icon: "code" | "photo" | "mail" | "braces" | "search" | "hash" | "hex" | "archive" | "shuffle" | "layers" | "eraser" | "book" | "list" | "clock" | "wave" | "camera" | "dice" | "circle" | "coin" | "heart";
   category: string;
   tags?: string[];
 };
