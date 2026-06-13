@@ -596,6 +596,13 @@ export default function Home() {
             icon: "list",
             tags: ["diff", "compare", "difference", "merge", "差分", "comparison", "patch", "unified", "side by side"],
           },
+          {
+            label: "cursed-text",
+            href: "/text/cursed-text",
+            description: "呪文テキスト",
+            icon: "code",
+            tags: ["zalgo", "cursed", "text", "corrupt", "unicode", "glitch", "weird", "font", "fancy", "morse", "spoiler", "upside down", "cursed text", "corrupted", "discord", "discord text", "markdown", "formatting", "regional indicator", "emoji letters", "fullwidth", "bubble", "fraktur", "double struck", "script", "small caps", "strikethrough"],
+          },
         ] satisfies ToolLink[],
       },
       {
@@ -641,7 +648,7 @@ export default function Home() {
             href: "/utils/random-picker",
             description: "ランダム選択",
             icon: "shuffle",
-            tags: ["random", "picker", "choose", "decision", "lottery", "raffle", "draw", "select", "giveaway", "randomizer"],
+            tags: ["random", "picker", "choose", "decision", "lottery", "raffle", "draw", "select", "giveaway", "randomizer", "wheel", "spin", "roulette", "decision wheel", "spinning wheel", "random picker", "pick a winner"],
           },
         ] satisfies ToolLink[],
       },

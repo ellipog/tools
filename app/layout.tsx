@@ -15,7 +15,6 @@ export const metadata: Metadata = {
     default: "runen",
     template: "%s // runen",
   },
-  description: "A collection of digital tools and artifacts.",
   applicationName: "runen",
   manifest: "/manifest.webmanifest",
 
@@ -32,7 +31,6 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://runen.no",
     title: "runen",
-    description: "Collection of varied digital utilities.",
     siteName: "runen",
     locale: "en_US",
     images: [{ url: "/og-image.png", width: 1200, height: 630 }],
@@ -41,7 +39,6 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "runen",
-    description: "Digital tools & artifacts.",
     images: ["/og-image.png"],
   },
 
