@@ -62,6 +62,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`h-full antialiased`} suppressHydrationWarning>
       <body className={`${nostrutaru.className} min-h-full flex flex-col`}>
+        {/* Pre-paint theme/CRT restore: runs before hydration so returning
+            visitors never flash the default dark theme or missing scanlines.
+            Providers re-read the same keys on mount and converge. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var d=document.documentElement;var s=null;try{s=JSON.parse(localStorage.getItem("aaenz:settings")||"null")}catch(e){}if(s&&s.theme==="light"){d.classList.add("light")}else if(!s&&localStorage.getItem("aaenz:theme")==="light"){d.classList.add("light")}if((localStorage.getItem("aaenz:crt")||"on")!=="off"){d.classList.add("crt-on")}}catch(e){}})();`,
+          }}
+        />
         <CrtInit />
         <ThemeProvider>
           <SettingsProvider>

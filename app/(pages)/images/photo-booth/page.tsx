@@ -6,6 +6,7 @@ import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import { jpcharlist } from "@/public/data/charlists";
 import { attributePng, attributeJpeg } from "@/lib/attribution";
+import { createFilterRenderer, type FilterRenderer } from "@/lib/gl-filters";
 
 // ──────────────────────────────
 // FILTER DEFINITIONS
@@ -554,6 +555,17 @@ export default function PhotoBoothPage() {
   const captureCanvasRef = useRef<HTMLCanvasElement>(null);
   const srcCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cellCanvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+  // Cached 2d contexts: getContext() every frame is wasted work, and the
+  // object identity is stable per canvas element.
+  const cellCtxRefs = useRef<(CanvasRenderingContext2D | null)[]>([]);
+  // One shared GPU renderer for all cells (a single WebGL context no matter
+  // the grid size). `undefined` = not attempted yet, `null` = unavailable
+  // (CPU fallback in applyFilter stays as the compat path).
+  const glRef = useRef<FilterRenderer | null | undefined>(undefined);
+  // pixelSize as a ref so the slider never restarts the render loop —
+  // it is just a shader uniform now.
+  const pixelSizeRef = useRef(pixelSize);
+  pixelSizeRef.current = pixelSize;
   const frameIdRef = useRef(0);
   const frameCountRef = useRef(0);
   const cellCountRef = useRef(1);
@@ -581,23 +593,17 @@ export default function PhotoBoothPage() {
       },
       audio: false,
     };
-    console.log("[photo-booth] requesting camera with constraints:", JSON.stringify(constraints));
     try {
       const s = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log("[photo-booth] getUserMedia resolved, stream id:", s.id, "tracks:", s.getVideoTracks().length);
       setStream(s);
       const videoEl = videoRef.current;
-      console.log("[photo-booth] video element exists:", !!videoEl, "dimensions:", videoEl?.videoWidth, videoEl?.videoHeight);
       if (videoEl) {
         videoEl.srcObject = s;
-        console.log("[photo-booth] srcObject assigned, readyState:", videoEl.readyState);
       }
       setCameraStatus("active");
       const all = await navigator.mediaDevices.enumerateDevices();
-      console.log("[photo-booth] enumerated devices:", all.length, "video inputs:", all.filter((d) => d.kind === "videoinput").length);
       setDevices(all.filter((d) => d.kind === "videoinput"));
     } catch (err: any) {
-      console.error("[photo-booth] getUserMedia failed:", { name: err.name, message: err.message, stack: err.stack, constraints: JSON.stringify(constraints) });
       setCameraStatus("error");
       if (err.name === "NotAllowedError") setCameraError("camera permission denied");
       else if (err.name === "NotFoundError") setCameraError("no camera found");
@@ -653,20 +659,22 @@ export default function PhotoBoothPage() {
     });
   }, [selectedCell]);
 
-  // ── Rendering loop ──
+  // ── Rendering loop (GPU first, CPU fallback) ──
   useEffect(() => {
     if (cameraStatus !== "active") {
       if (frameIdRef.current) { cancelAnimationFrame(frameIdRef.current); frameIdRef.current = 0; }
       return;
     }
 
-    if (!srcCanvasRef.current) {
-      srcCanvasRef.current = document.createElement("canvas");
+    // Lazily create the one shared GPU renderer (single WebGL context
+    // regardless of grid size). Stays undefined until first attempt.
+    if (glRef.current === undefined) {
+      try {
+        glRef.current = createFilterRenderer();
+      } catch {
+        glRef.current = null;
+      }
     }
-    const srcCanvas = srcCanvasRef.current;
-    const srcCtx = srcCanvas.getContext("2d", { willReadFrequently: true })!;
-
-    let lastPw = 0, lastPh = 0;
 
     const loop = () => {
       const video = videoRef.current;
@@ -675,28 +683,11 @@ export default function PhotoBoothPage() {
         return;
       }
 
-      const vw = video.videoWidth;
-      const vh = video.videoHeight;
-      if (vw === 0 || vh === 0) {
+      const pw = video.videoWidth;
+      const ph = video.videoHeight;
+      if (pw === 0 || ph === 0) {
         frameIdRef.current = requestAnimationFrame(loop);
         return;
-      }
-
-      // Use camera's native resolution for full quality
-      let pw = vw, ph = vh;
-
-      // Resize canvases if aspect ratio changed
-      if (pw !== lastPw || ph !== lastPh) {
-        srcCanvas.width = pw;
-        srcCanvas.height = ph;
-        lastPw = pw;
-        lastPh = ph;
-        // Update all cell canvases
-        const cellCount = gridLayoutRef.current.rows * gridLayoutRef.current.cols;
-        for (let i = 0; i < cellCount; i++) {
-          const c = cellCanvasRefs.current[i];
-          if (c) { c.width = pw; c.height = ph; }
-        }
       }
 
       const rows = gridLayoutRef.current.rows;
@@ -705,32 +696,78 @@ export default function PhotoBoothPage() {
       const filters = cellFiltersRef.current;
 
       frameCountRef.current++;
+      const time = frameCountRef.current / 60;
+      const seed = Math.random() * 100;
+      const gl = glRef.current;
 
-      const throttle = cellCount <= 1 ? 1 : cellCount <= 4 ? 2 : cellCount <= 6 ? 3 : 4;
-      if (frameCountRef.current % throttle !== 0) {
-        frameIdRef.current = requestAnimationFrame(loop);
-        return;
-      }
+      if (gl) {
+        // GPU path: ONE texture upload per frame, one fullscreen-quad draw
+        // per cell, then a GPU→GPU blit into each visible canvas. Zero
+        // getImageData/putImageData readbacks — this is what makes 12
+        // simultaneous filtered cells run at full framerate.
+        for (let i = 0; i < cellCount; i++) {
+          const canvas = cellCanvasRefs.current[i];
+          if (!canvas) continue;
+          if (canvas.width !== pw || canvas.height !== ph) {
+            canvas.width = pw;
+            canvas.height = ph;
+          }
+          let ctx = cellCtxRefs.current[i];
+          if (!ctx) {
+            ctx = canvas.getContext("2d")!;
+            cellCtxRefs.current[i] = ctx;
+          }
+          gl.render(video, pw, ph, filters[i] ?? "normal", {
+            pixel: pixelSizeRef.current,
+            time,
+            seed,
+          });
+          ctx.drawImage(gl.canvas, 0, 0);
+        }
+      } else {
+        // CPU fallback (no WebGL2): original readback path, throttled so
+        // large grids degrade gracefully instead of freezing the tab.
+        if (!srcCanvasRef.current) {
+          srcCanvasRef.current = document.createElement("canvas");
+        }
+        const srcCanvas = srcCanvasRef.current;
+        if (srcCanvas.width !== pw || srcCanvas.height !== ph) {
+          srcCanvas.width = pw;
+          srcCanvas.height = ph;
+          for (let i = 0; i < cellCount; i++) {
+            const c = cellCanvasRefs.current[i];
+            if (c) { c.width = pw; c.height = ph; }
+          }
+        }
+        const srcCtx = srcCanvas.getContext("2d", { willReadFrequently: true })!;
 
-      srcCtx.drawImage(video, 0, 0, pw, ph);
+        const throttle = cellCount <= 1 ? 1 : cellCount <= 4 ? 2 : cellCount <= 6 ? 3 : 4;
+        if (frameCountRef.current % throttle === 0) {
+          srcCtx.drawImage(video, 0, 0, pw, ph);
 
-      for (let i = 0; i < cellCount; i++) {
-        const canvas = cellCanvasRefs.current[i];
-        if (!canvas) continue;
-        const ctx = canvas.getContext("2d")!;
-        const fid = filters[i] ?? "normal";
+          for (let i = 0; i < cellCount; i++) {
+            const canvas = cellCanvasRefs.current[i];
+            if (!canvas) continue;
+            let ctx = cellCtxRefs.current[i];
+            if (!ctx) {
+              ctx = canvas.getContext("2d")!;
+              cellCtxRefs.current[i] = ctx;
+            }
+            const fid = filters[i] ?? "normal";
 
-        if (fid === "normal") {
-          ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height);
-        } else if (fid === "mirror") {
-          ctx.save();
-          ctx.scale(-1, 1);
-          ctx.drawImage(srcCanvas, -canvas.width, 0, canvas.width, canvas.height);
-          ctx.restore();
-        } else {
-          const data = srcCtx.getImageData(0, 0, pw, ph);
-          applyFilter(data, fid, pixelSize, frameCountRef.current);
-          ctx.putImageData(data, 0, 0);
+            if (fid === "normal") {
+              ctx.drawImage(srcCanvas, 0, 0, canvas.width, canvas.height);
+            } else if (fid === "mirror") {
+              ctx.save();
+              ctx.scale(-1, 1);
+              ctx.drawImage(srcCanvas, -canvas.width, 0, canvas.width, canvas.height);
+              ctx.restore();
+            } else {
+              const data = srcCtx.getImageData(0, 0, pw, ph);
+              applyFilter(data, fid, pixelSizeRef.current, frameCountRef.current);
+              ctx.putImageData(data, 0, 0);
+            }
+          }
         }
       }
 
@@ -742,7 +779,7 @@ export default function PhotoBoothPage() {
     return () => {
       if (frameIdRef.current) cancelAnimationFrame(frameIdRef.current);
     };
-  }, [cameraStatus, pixelSize]);
+  }, [cameraStatus]);
 
   // ── Capture ──
   const capture = useCallback(() => {
@@ -761,19 +798,30 @@ export default function PhotoBoothPage() {
     const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
 
     const fid = cellFilters[selectedCell] ?? "normal";
+    const gl = glRef.current;
 
-    if (fid === "mirror") {
+    if (gl) {
+      // GPU path: render + blit + snapshot synchronously in one task, so
+      // the drawing buffer is still valid — no preserveDrawingBuffer cost.
+      // (Mirror is just a shader UV flip here, no special-casing needed.)
+      gl.render(video, w, h, fid, {
+        pixel: pixelSize,
+        time: frameCountRef.current / 60,
+        seed: Math.random() * 100,
+      });
+      ctx.drawImage(gl.canvas, 0, 0);
+    } else if (fid === "mirror") {
+      ctx.save();
       ctx.scale(-1, 1);
       ctx.drawImage(video, -w, 0, w, h);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.restore();
     } else {
       ctx.drawImage(video, 0, 0, w, h);
-    }
-
-    if (fid !== "normal" && fid !== "mirror") {
-      const imgData = ctx.getImageData(0, 0, w, h);
-      applyFilter(imgData, fid, pixelSize, frameCountRef.current);
-      ctx.putImageData(imgData, 0, 0);
+      if (fid !== "normal") {
+        const imgData = ctx.getImageData(0, 0, w, h);
+        applyFilter(imgData, fid, pixelSize, frameCountRef.current);
+        ctx.putImageData(imgData, 0, 0);
+      }
     }
 
     const dataUrl = canvas.toDataURL("image/png");
@@ -978,8 +1026,6 @@ export default function PhotoBoothPage() {
               playsInline
               muted
               className="absolute inset-0 w-full h-full opacity-0 pointer-events-none"
-              onLoadedMetadata={() => console.log("[photo-booth] video loadedMetadata, dims:", videoRef.current?.videoWidth, videoRef.current?.videoHeight)}
-              onError={() => console.error("[photo-booth] video element error:", videoRef.current?.error?.message)}
             />
 
             {cameraStatus === "idle" && (
@@ -1015,7 +1061,12 @@ export default function PhotoBoothPage() {
                       }`}
                   >
                     <canvas
-                      ref={(el) => { cellCanvasRefs.current[i] = el; }}
+                      ref={(el) => {
+                        cellCanvasRefs.current[i] = el;
+                        // Drop the cached 2d context when the element
+                        // detaches (grid changes remount canvases).
+                        if (!el) cellCtxRefs.current[i] = null;
+                      }}
                       className="w-full block"
                     />
                     <div className="absolute bottom-0.5 left-0.5 text-[7px] leading-none text-white/60 uppercase px-0.5 bg-black/50">

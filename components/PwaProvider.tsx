@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { usePathname } from "next/navigation";
 
 export default function PwaProvider({
@@ -15,6 +15,9 @@ export default function PwaProvider({
     useState<BeforeInstallPromptEvent | null>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  // Guards the controllerchange reload: without it, repeated SW updates
+  // (or a flapping worker) reload the page in a loop.
+  const reloadedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -35,20 +38,33 @@ export default function PwaProvider({
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstall);
 
+    const handleControllerChange = () => {
+      if (reloadedRef.current) return;
+      reloadedRef.current = true;
+      window.location.reload();
+    };
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/sw.js", { scope: "/", updateViaCache: "none" })
         .catch(() => {});
 
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        window.location.reload();
-      });
+      navigator.serviceWorker.addEventListener(
+        "controllerchange",
+        handleControllerChange,
+      );
     }
 
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener(
+          "controllerchange",
+          handleControllerChange,
+        );
+      }
     };
   }, []);
 

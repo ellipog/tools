@@ -1,13 +1,23 @@
 "use client";
 
-import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { useMemo, useState, useRef, useEffect, useCallback, memo } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
 import Navbar from "@/components/ui/Navbar";
 import { jpcharlist } from "@/public/data/charlists";
-import FeatureModal from "@/components/RequestFeature";
-import CommandPalette from "@/components/CommandPalette";
 import DisplayControl from "@/components/DisplayControl";
+
+// Palette + feature modal are closed on load and pull in framer-motion:
+// split them out of the homepage chunk so first paint stays light.
+const CommandPalette = dynamic(
+  () => import("@/components/CommandPalette"),
+  { ssr: false },
+);
+const FeatureModal = dynamic(
+  () => import("@/components/RequestFeature"),
+  { ssr: false },
+);
 
 const PINS_KEY = "aaenz:pins";
 
@@ -490,6 +500,54 @@ function StarIcon({ filled, className = "" }: { filled: boolean; className?: str
   );
 }
 
+// Hoisted + memoized: defining this inside Home recreated the component
+// type on every keystroke, forcing React to unmount/remount all ~35 rows
+// (and restart every ScrambleText animation) instead of reconciling them.
+const ToolRow = memo(function ToolRow({
+  item,
+  pinned,
+  onTogglePin,
+  jpchars,
+}: {
+  item: ToolLink & { category?: string };
+  pinned: boolean;
+  onTogglePin: (href: string) => void;
+  jpchars: string[];
+}) {
+  return (
+    <li className="hover:bg-white/[0.03] -mx-2 px-2 py-0.5 rounded-sm transition-colors">
+      <div className="flex items-baseline gap-2">
+        <Link
+          href={item.href}
+          className="group inline-flex min-w-0 items-baseline gap-2 text-white/70 hover:text-white transition-colors cursor-pointer"
+        >
+          <span className="translate-y-px">
+            <LinkIcon kind={item.icon} />
+          </span>
+          <span className="text-lg leading-none">{item.label}</span>
+          {item.description ? (
+            <ScrambleText
+              text={item.description}
+              chars={jpchars}
+              timeOffset={100}
+              autoPlay={true}
+              className="text-sm text-white/35 group-hover:text-white/45 transition-colors"
+            />
+          ) : null}
+        </Link>
+        <button
+          type="button"
+          onClick={() => onTogglePin(item.href)}
+          className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer"
+          aria-label={pinned ? `Unpin ${item.label}` : `Pin ${item.label}`}
+        >
+          <StarIcon filled={pinned} className="-mt-0.5" />
+        </button>
+      </div>
+    </li>
+  );
+});
+
 export default function Home() {
   const [query, setQuery] = useState("");
   const [showFeatureRequest, setShowFeatureRequest] = useState(false);
@@ -499,7 +557,7 @@ export default function Home() {
   const [platformHint, setPlatformHint] = useState("ctrl+k");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const jpchars = useMemo(() => jpcharlist, []);
+  const jpchars = jpcharlist;
 
   useEffect(() => {
     try {
@@ -524,20 +582,27 @@ export default function Home() {
         setPaletteOpen(true);
         return;
       }
+      // Never hijack keys meant for interactive elements: typing a space
+      // in a field, activating a focused button, or using a select must
+      // keep working natively.
+      const ae = document.activeElement;
       if (
-        e.key === " " &&
-        document.activeElement !== inputRef.current &&
-        !paletteOpen
+        ae instanceof HTMLInputElement ||
+        ae instanceof HTMLTextAreaElement ||
+        ae instanceof HTMLSelectElement ||
+        (ae instanceof HTMLElement &&
+          (ae.isContentEditable ||
+            ae.tagName === "BUTTON" ||
+            !!ae.closest("a,button")))
       ) {
+        return;
+      }
+      if (e.key === " " && !paletteOpen) {
         e.preventDefault();
         setPaletteOpen(true);
         return;
       }
-      if (
-        e.key === "/" &&
-        document.activeElement !== inputRef.current &&
-        !paletteOpen
-      ) {
+      if (e.key === "/" && !paletteOpen) {
         e.preventDefault();
         inputRef.current?.focus();
         return;
@@ -831,47 +896,7 @@ export default function Home() {
       .filter((g) => g.items.length > 0);
   }, [groups, query, selectedCategory]);
 
-  function ToolItem({ item }: { item: ToolLink & { category?: string } }) {
-    return (
-      <li className="hover:bg-white/[0.03] -mx-2 px-2 py-0.5 rounded-sm transition-colors">
-        <Link
-          href={item.href}
-          className="group inline-flex items-baseline gap-2 text-white/70 hover:text-white transition-colors cursor-pointer"
-        >
-          <span className="translate-y-px">
-            <LinkIcon kind={item.icon} />
-          </span>
-          <span className="text-lg leading-none">
-            {item.label}
-          </span>
-          {item.description ? (
-            <ScrambleText
-              text={item.description}
-              chars={jpchars}
-              timeOffset={100}
-              autoPlay={true}
-              className="text-sm text-white/35 group-hover:text-white/45 transition-colors"
-            />
-          ) : null}
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              togglePin(item.href);
-            }}
-            className="opacity-40 hover:opacity-100 transition-opacity cursor-pointer"
-            aria-label={
-              pins.includes(item.href)
-                ? `Unpin ${item.label}`
-                : `Pin ${item.label}`
-            }
-          >
-            <StarIcon filled={pins.includes(item.href)} className="-mt-0.5" />
-          </button>
-        </Link>
-      </li>
-    );
-  }
+  const pinSet = useMemo(() => new Set(pins), [pins]);
 
   return (
     <div className="min-h-screen">
@@ -912,7 +937,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-2 pl-5 h-[calc(100vh-320px)] overflow-y-hidden overflow-x-auto custom-scrollbar">
+          <div className="mt-2 pl-5 h-[calc(100vh-320px)] overflow-y-auto overflow-x-auto custom-scrollbar">
             <div className="columns-1 sm:columns-2 lg:columns-3 gap-x-10 h-full [column-fill:auto]">
               {filteredGroups.map((group) => (
                 <section
@@ -925,7 +950,13 @@ export default function Home() {
                   </div>
                   <ul className="mt-3 space-y-2.5">
                     {group.items.map((item) => (
-                      <ToolItem key={item.href} item={item} />
+                      <ToolRow
+                        key={item.href}
+                        item={item}
+                        pinned={pinSet.has(item.href)}
+                        onTogglePin={togglePin}
+                        jpchars={jpchars}
+                      />
                     ))}
                   </ul>
                 </section>

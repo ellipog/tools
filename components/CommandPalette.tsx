@@ -73,7 +73,7 @@ export default function CommandPalette({ isOpen, onClose, tools, pins }: Command
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  const jpchars = useMemo(() => jpcharlist, []);
+  const jpchars = jpcharlist;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -92,11 +92,11 @@ export default function CommandPalette({ isOpen, onClose, tools, pins }: Command
   }, [tools, query, pins]);
 
   useEffect(() => {
-    if (isOpen) {
-      setQuery("");
-      setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
+    if (!isOpen) return;
+    setQuery("");
+    setSelectedIndex(0);
+    const id = setTimeout(() => inputRef.current?.focus(), 50);
+    return () => clearTimeout(id);
   }, [isOpen]);
 
   useEffect(() => {

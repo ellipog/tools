@@ -23,6 +23,10 @@ export default function ScrambleText({
 }: ScrambleTextProps) {
   const elRef = useRef<HTMLSpanElement | null>(null);
   const instanceRef = useRef<ScrambleTextLib | null>(null);
+  // onDone is often an inline closure: keep it in a ref so a new callback
+  // identity doesn't tear down and restart the animation every render.
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
 
   const charsKey = useMemo(() => (chars ? chars.join("") : ""), [chars]);
   const charsMemo = useMemo(() => chars, [charsKey]);
@@ -37,7 +41,7 @@ export default function ScrambleText({
     instanceRef.current = new ScrambleTextLib(el, {
       timeOffset,
       chars: charsMemo,
-      callback: onDone,
+      callback: () => onDoneRef.current?.(),
     });
 
     if (autoPlay) {
@@ -49,7 +53,7 @@ export default function ScrambleText({
       instanceRef.current = null;
     };
     // charsKey ensures we recreate when chars array content changes
-  }, [text, timeOffset, autoPlay, onDone, charsKey, charsMemo]);
+  }, [text, timeOffset, autoPlay, charsKey, charsMemo]);
 
   return <span ref={elRef} className={className} />;
 }

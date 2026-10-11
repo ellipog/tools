@@ -1,7 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import ScrambleText from "@/components/ScrambleText";
 import PinStar from "@/components/PinStar";
-import { useMemo } from "react";
 import { jpcharlist } from "@/public/data/charlists";
 
 export type HeaderProps = {
@@ -12,8 +13,6 @@ export type HeaderProps = {
 };
 
 export default function Navbar({ title, jp, category, href }: HeaderProps) {
-  const jpchars = useMemo(() => jpcharlist, []);
-
   return (
     <div className="text-white pt-8 pl-11 absolute">
       <div className="text-xs text-white/40 tracking-widest uppercase flex items-center gap-1">
@@ -31,7 +30,7 @@ export default function Navbar({ title, jp, category, href }: HeaderProps) {
         <ScrambleText text={title} className="text-3xl tracking-tight" />
         <ScrambleText
           text={jp}
-          chars={jpchars}
+          chars={jpcharlist}
           timeOffset={100}
           autoPlay={true}
           className="text-xl text-white/35 transition-colors"

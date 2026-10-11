@@ -1,10 +1,16 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   experimental: {
+    // Default is 300s: the previous 30s revalidated static pages on nearly
+    // every revisit, flashing loading states on a fully static site.
     staleTimes: {
-      static: 30,
+      static: 300,
     },
+    // framer-motion ships many modules; only bundle the ones in use.
+    // (lucide-react is already optimized by default — and currently unused.)
+    optimizePackageImports: ["framer-motion"],
   },
   async headers() {
     return [

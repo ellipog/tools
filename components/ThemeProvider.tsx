@@ -29,6 +29,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const next = prev === "dark" ? "light" : "dark";
       applyTheme(next);
       localStorage.setItem(STORAGE_KEY, next);
+      // SettingsProvider owns a settings blob that also carries the theme
+      // and rewrites this key on every update: keep the blob in sync so a
+      // later display-setting change doesn't silently revert the theme.
+      try {
+        const raw = localStorage.getItem("aaenz:settings");
+        if (raw) {
+          localStorage.setItem(
+            "aaenz:settings",
+            JSON.stringify({ ...JSON.parse(raw), theme: next }),
+          );
+        }
+      } catch {
+        // ignore corrupt data
+      }
       return next;
     });
   };
